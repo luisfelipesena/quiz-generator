@@ -25,27 +25,31 @@ export function QuizResults() {
   }
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6">
+    <div className="max-w-4xl mx-auto space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
       <div className="text-center space-y-2">
-        <h1 className="text-3xl font-bold">Quiz Complete!</h1>
-        <p className="text-muted-foreground">
+        <h1 className="text-4xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent animate-in fade-in zoom-in duration-1000">
+          🎉 Quiz Complete! 🎉
+        </h1>
+        <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
           Here are your results and a breakdown of each question
         </p>
       </div>
 
       {/* Score Summary */}
-      <Card className="p-8 text-center">
-        <div className="space-y-4">
-          <div className={`text-6xl font-bold ${getScoreColor(percentage)}`}>
+      <Card className="p-8 text-center transition-all duration-500 hover:shadow-xl animate-in fade-in zoom-in duration-700" style={{ animationDelay: '200ms' }}>
+        <div className="space-y-6">
+          <div className={`text-8xl font-bold transition-all duration-1000 animate-in zoom-in ${getScoreColor(percentage)}`} style={{ animationDelay: '400ms' }}>
             {percentage}%
           </div>
-          <div className="space-y-2">
-            <p className="text-xl font-semibold">{getScoreMessage(percentage)}</p>
-            <p className="text-muted-foreground">
-              You got {correct} out of {total} questions correct
+          <div className="space-y-3 animate-in fade-in slide-in-from-bottom-2 duration-700" style={{ animationDelay: '600ms' }}>
+            <p className="text-2xl font-semibold">{getScoreMessage(percentage)}</p>
+            <p className="text-lg text-muted-foreground">
+              You got <span className="font-bold text-primary">{correct}</span> out of <span className="font-bold">{total}</span> questions correct
             </p>
           </div>
-          <Progress value={percentage} className="h-3 max-w-md mx-auto" />
+          <div className="animate-in fade-in slide-in-from-bottom-2 duration-700" style={{ animationDelay: '800ms' }}>
+            <Progress value={percentage} className="h-4 max-w-md mx-auto" />
+          </div>
         </div>
       </Card>
 
@@ -115,10 +119,16 @@ export function QuizResults() {
       </div>
 
       {/* Actions */}
-      <div className="flex justify-center space-x-4">
-        <Button onClick={resetQuiz} variant="outline" size="lg">
-          <RotateCcw className="w-4 h-4 mr-2" />
-          Take Another Quiz
+      <div className="flex justify-center space-x-4 animate-in fade-in slide-in-from-bottom-2 duration-700" style={{ animationDelay: '1000ms' }}>
+        <Button 
+          onClick={resetQuiz} 
+          variant="outline" 
+          size="lg"
+          className="px-8 py-4 text-lg relative overflow-hidden group transition-all duration-300 hover:scale-105"
+        >
+          <RotateCcw className="w-5 h-5 mr-2 transition-transform group-hover:rotate-180 duration-300" />
+          <span className="relative z-10">Take Another Quiz</span>
+          <div className="absolute inset-0 bg-gradient-to-r from-primary/0 via-primary/10 to-primary/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
         </Button>
       </div>
     </div>

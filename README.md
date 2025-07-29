@@ -47,12 +47,6 @@ quiz-generator/
 │       ├── main.py        # FastAPI app
 │       ├── requirements.txt
 │       └── venv/          # Python virtual environment
-├── scripts/               # Development scripts
-│   ├── start-servers.sh   # Start both servers
-│   ├── run-frontend.sh    # Start frontend only
-│   ├── run-backend.sh     # Start backend only
-│   ├── start-dev.sh       # Alternative startup script
-│   └── test-app.sh        # Test application setup
 ├── package.json           # Monorepo root
 └── README.md
 ```
@@ -79,12 +73,8 @@ quiz-generator/
    ```
 
 3. **Set up environment variables**:
-   Create `.env` files in the root directory and add your OpenAI API key:
+   Create `.env` files in each app directory:
    ```bash
-   # Root .env
-   OPENAI_API_KEY=sk-your-openai-api-key-here
-   NEXT_PUBLIC_API_URL=http://localhost:8000
-   
    # apps/backend/.env
    OPENAI_API_KEY=sk-your-openai-api-key-here
    

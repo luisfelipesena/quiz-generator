@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
-import { QuestionAnswer } from '@/lib/api'
+import { type QuestionAnswer, type QuestionUpdateRequest } from '@/lib/api'
 import { useQuizStore } from '@/stores/quiz-store'
 
 interface QuestionEditorProps {
@@ -21,7 +21,13 @@ export function QuestionEditor({ question, index }: QuestionEditorProps) {
   const { updateQuestion } = useQuizStore()
 
   const handleSave = () => {
-    updateQuestion(question.id, editedQuestion)
+    const questionUpdate: QuestionUpdateRequest = {
+      id: editedQuestion.id,
+      question: editedQuestion.question,
+      answer: editedQuestion.answer,
+      options: editedQuestion.options,
+    }
+    updateQuestion(question.id, questionUpdate)
     setIsEditing(false)
   }
 
@@ -158,23 +164,37 @@ export function QuestionEditList() {
   }
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6">
+    <div className="max-w-4xl mx-auto space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
       <div className="text-center space-y-2">
-        <h1 className="text-3xl font-bold">Review & Edit Questions</h1>
-        <p className="text-muted-foreground">
-          Review the generated questions and make any necessary edits before starting the quiz
+        <h1 className="text-4xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
+          Review & Edit Questions
+        </h1>
+        <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+          Review the generated questions and make any necessary edits before starting the quiz. 
+          Your changes are automatically saved.
         </p>
       </div>
 
       <div className="space-y-6">
         {questions.map((question, index) => (
-          <QuestionEditor key={question.id} question={question} index={index} />
+          <div 
+            key={question.id} 
+            className="animate-in fade-in slide-in-from-bottom-2 duration-500"
+            style={{ animationDelay: `${index * 100}ms` }}
+          >
+            <QuestionEditor question={question} index={index} />
+          </div>
         ))}
       </div>
 
-      <div className="flex justify-center">
-        <Button onClick={handleStartQuiz} size="lg" className="px-8">
-          Start Quiz
+      <div className="flex justify-center animate-in fade-in slide-in-from-bottom-2 duration-500" style={{ animationDelay: `${questions.length * 100}ms` }}>
+        <Button 
+          onClick={handleStartQuiz} 
+          size="lg" 
+          className="px-12 py-4 text-lg relative overflow-hidden group transition-all duration-300 hover:scale-105"
+        >
+          <span className="relative z-10">Start Quiz</span>
+          <div className="absolute inset-0 bg-gradient-to-r from-primary/0 via-white/20 to-primary/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
         </Button>
       </div>
     </div>

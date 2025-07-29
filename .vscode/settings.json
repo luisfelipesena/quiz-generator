@@ -1,3 +1,22 @@
 {
-  "git.ignoreLimitWarning": true
+  "python.defaultInterpreterPath": "${workspaceFolder}/apps/backend/venv/bin/python",
+  "python.analysis.extraPaths": [
+    "${workspaceFolder}/apps/backend/src",
+    "${workspaceFolder}/apps/backend"
+  ],
+  "python.analysis.autoImportCompletions": true,
+  "python.analysis.typeCheckingMode": "basic",
+  "python.linting.enabled": true,
+  "python.linting.ruffEnabled": true,
+  "python.linting.mypyEnabled": false,
+  "python.formatting.provider": "black",
+  "[python]": {
+    "editor.formatOnSave": true,
+    "editor.codeActionsOnSave": {
+      "source.organizeImports": "explicit"
+    }
+  },
+  "python.analysis.diagnosticSeverityOverrides": {
+    "reportMissingImports": "none"
+  }
 }

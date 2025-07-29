@@ -1,6 +1,6 @@
 import { create } from 'zustand'
-import { devtools } from 'zustand/middleware'
-import { QuestionAnswer, AnswerResponse } from '@/lib/api'
+import { devtools, persist } from 'zustand/middleware'
+import { type QuestionAnswer, type AnswerResponse, type QuestionUpdateRequest } from '@/lib/api'
 
 export type QuizStep = 'upload' | 'edit' | 'quiz' | 'results'
 
@@ -24,11 +24,13 @@ interface QuizState {
   currentQuestionIndex: number
   answers: QuizAnswer[]
   showFeedback: boolean
-  
+}
+
+interface QuizActions {
   // Actions
   setCurrentStep: (step: QuizStep) => void
   setQuestions: (questions: QuestionAnswer[]) => void
-  updateQuestion: (questionId: string, question: QuestionAnswer) => void
+  updateQuestion: (questionId: string, questionUpdate: QuestionUpdateRequest) => void
   
   // Quiz actions
   startQuiz: () => void
@@ -42,9 +44,10 @@ interface QuizState {
   isQuizComplete: () => boolean
 }
 
-export const useQuizStore = create<QuizState>()(
+export const useQuizStore = create<QuizState & QuizActions>()(
   devtools(
-    (set, get) => ({
+    persist(
+      (set, get) => ({
       // Initial state
       currentStep: 'upload',
       questions: [],
@@ -63,11 +66,16 @@ export const useQuizStore = create<QuizState>()(
         answers: [],
       }),
       
-      updateQuestion: (questionId, question) =>
+      updateQuestion: (questionId, questionUpdate) =>
         set((state) => ({
           editedQuestions: {
             ...state.editedQuestions,
-            [questionId]: question,
+            [questionId]: {
+              id: questionUpdate.id,
+              question: questionUpdate.question,
+              answer: questionUpdate.answer,
+              options: questionUpdate.options,
+            },
           },
         })),
 
@@ -139,8 +147,17 @@ export const useQuizStore = create<QuizState>()(
         return currentQuestionIndex >= questions.length
       },
     }),
+      {
+        name: 'quiz-store',
+        // Only persist the essential state, not the computed functions
+        partialize: (state) => ({
+          editedQuestions: state.editedQuestions,
+          questions: state.questions,
+        }),
+      }
+    ),
     {
-      name: 'quiz-store',
+      name: 'quiz-store-devtools',
     }
   )
 )

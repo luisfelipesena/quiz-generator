@@ -4,12 +4,18 @@
   "description": "FastAPI backend for quiz generator",
   "main": "main.py",
   "scripts": {
-    "dev": "python -m fastapi dev main.py --reload",
-    "start": "python -m fastapi run main.py",
-    "build": "echo 'Build complete'",
+    "dev": "python -m fastapi dev main.py --reload --port 8000",
+    "start": "python -m fastapi run main.py --port 8000",
+    "build": "echo '✅ Backend build complete - Python backend ready'",
+    "test": "python -m pytest tests/ -v",
+    "test:imports": "python -c 'from src.common.api import common_router; from src.quiz.api import quiz_router; from src.pdf.api import pdf_router; print(\"✅ All imports successful\")'",
     "lint": "ruff check .",
+    "lint:fix": "ruff check . --fix",
     "format": "ruff format .",
-    "type-check": "mypy ."
+    "type-check": "mypy . --ignore-missing-imports",
+    "clean": "find . -type d -name __pycache__ -exec rm -rf {} + 2>/dev/null || true",
+    "install": "pip install -r requirements.txt",
+    "setup": "python -m venv venv && source venv/bin/activate && pip install -r requirements.txt"
   },
   "dependencies": {},
   "devDependencies": {}

@@ -1,12 +1,11 @@
 'use client'
 
 import { useState } from 'react'
-import { useMutation } from '@tanstack/react-query'
 import { Check, X, ArrowRight } from 'lucide-react'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Progress } from '@/components/ui/progress'
-import { api, type AnswerRequest, type AnswerResponse, ApiError } from '@/lib/api'
+import { useQuizAnswer } from '@/hooks/useQuizMutations'
 import { useQuizStore } from '@/stores/quiz-store'
 
 export function Quiz() {
@@ -18,39 +17,27 @@ export function Quiz() {
     currentQuestionIndex,
     showFeedback,
     getCurrentQuestion,
-    submitAnswer,
     nextQuestion,
     isQuizComplete,
   } = useQuizStore()
 
   const currentQuestion = getCurrentQuestion()
-
-  const checkAnswerMutation = useMutation<AnswerResponse, ApiError, AnswerRequest>({
-    mutationFn: api.checkAnswer,
-    onSuccess: (result: AnswerResponse) => {
-      if (currentQuestion) {
-        submitAnswer(currentQuestion.id, selectedAnswer, result)
-        setHasAnswered(true)
-      }
-    },
-    onError: (error: ApiError) => {
-      console.error('Answer check failed:', error)
-    },
-  })
+  const { checkAnswer, isLoading, error, reset } = useQuizAnswer()
 
   const handleAnswerSelect = (answer: string) => {
-    if (!showFeedback && !checkAnswerMutation.isPending) {
+    if (!showFeedback && !isLoading) {
       setSelectedAnswer(answer)
     }
   }
 
-  const handleSubmitAnswer = () => {
+  const handleSubmitAnswer = async () => {
     if (currentQuestion && selectedAnswer && !hasAnswered) {
-      const answerRequest: AnswerRequest = {
-        question_id: currentQuestion.id,
-        user_answer: selectedAnswer,
+      try {
+        await checkAnswer(currentQuestion.id, selectedAnswer)
+        setHasAnswered(true)
+      } catch (error) {
+        console.error('Failed to check answer:', error)
       }
-      checkAnswerMutation.mutate(answerRequest)
     }
   }
 
@@ -58,7 +45,7 @@ export function Quiz() {
     nextQuestion()
     setSelectedAnswer('')
     setHasAnswered(false)
-    checkAnswerMutation.reset()
+    reset()
   }
 
   if (!currentQuestion) {
@@ -109,8 +96,8 @@ export function Quiz() {
                 <button
                   key={index}
                   onClick={() => handleAnswerSelect(option)}
-                  disabled={showFeedback || checkAnswerMutation.isPending}
-                  className={`w-full p-5 text-left rounded-lg border-2 transition-all duration-300 transform hover:scale-[1.02] animate-in fade-in slide-in-from-bottom-2 duration-500 ${
+                  disabled={showFeedback || isLoading}
+                  className={`w-full p-5 text-left rounded-lg border-2 transition-all duration-300 transform hover:scale-[1.02] animate-in fade-in slide-in-from-bottom-2 ${
                     isSelected
                       ? showFeedback
                         ? isCorrectOption
@@ -121,7 +108,7 @@ export function Quiz() {
                       ? 'border-green-500 bg-green-50 text-green-900 shadow-green-100 shadow-lg'
                       : 'border-border hover:border-muted-foreground/50 hover:bg-accent/50'
                   } ${
-                    showFeedback || checkAnswerMutation.isPending
+                    showFeedback || isLoading
                       ? 'cursor-default'
                       : 'cursor-pointer'
                   }`}
@@ -177,9 +164,9 @@ export function Quiz() {
             {!showFeedback ? (
               <Button
                 onClick={handleSubmitAnswer}
-                disabled={!selectedAnswer || checkAnswerMutation.isPending}
+                disabled={!selectedAnswer || isLoading}
               >
-                {checkAnswerMutation.isPending ? 'Checking...' : 'Submit Answer'}
+                {isLoading ? 'Checking...' : 'Submit Answer'}
               </Button>
             ) : (
               <Button onClick={handleNextQuestion}>

@@ -1,0 +1,228 @@
+---
+alwaysApply: true
+description: Complete project guide for PDF Quiz Generator covering requirements, architecture, and Bun-first approach
+---
+
+# 🧪 PDF Quiz Generator - Project Guide
+
+## 🎯 Project Overview
+This is an **Oleve Take-Home Project**: An AI-powered web application that generates quiz questions from PDF documents.
+
+### Core Requirements (100% Complete)
+- **Frontend**: React with Next.js App Router (v15)
+- **Backend**: FastAPI (Python)
+- **State Management**: Zustand with persistence
+- **Data Fetching**: React Query (TanStack Query)
+- **AI Integration**: OpenAI API for question generation
+- **Styling**: Tailwind CSS v4 + shadcn/ui components
+- **Type Safety**: TypeScript everywhere
+- **Form Handling**: React Hook Form + Zod validation
+
+### User Flow (Fully Implemented)
+1. **Upload PDF** → Extract text → Generate 10 questions via OpenAI
+2. **Edit Questions** → Review/modify questions (auto-saved to localStorage)
+3. **Take Quiz** → Interactive quiz with immediate feedback
+4. **View Results** → Score breakdown with detailed analysis
+
+## 📁 Project Structure
+
+```
+quiz-generator/
+├── apps/
+│   ├── frontend/                    # Next.js 15 App Router
+│   │   ├── src/
+│   │   │   ├── app/                 # App Router pages
+│   │   │   │   ├── layout.tsx       # Root layout
+│   │   │   │   ├── page.tsx         # Main app with step transitions
+│   │   │   │   └── globals.css      # Tailwind v4 + design tokens
+│   │   │   ├── components/
+│   │   │   │   ├── features/        # Main feature components
+│   │   │   │   │   ├── pdf-upload.tsx
+│   │   │   │   │   ├── question-editor.tsx
+│   │   │   │   │   ├── quiz.tsx
+│   │   │   │   │   └── quiz-results.tsx
+│   │   │   │   └── ui/              # shadcn/ui components
+│   │   │   │       ├── button.tsx
+│   │   │   │       ├── card.tsx
+│   │   │   │       ├── input.tsx
+│   │   │   │       ├── progress.tsx
+│   │   │   │       └── ...
+│   │   │   ├── lib/
+│   │   │   │   ├── api.ts           # API client with Zod schemas
+│   │   │   │   └── utils.ts         # Utility functions
+│   │   │   ├── providers/
+│   │   │   │   └── query-provider.tsx # React Query setup
+│   │   │   └── stores/
+│   │   │       └── quiz-store.ts    # Zustand store with persistence
+│   │   ├── package.json             # Bun-managed dependencies
+│   │   └── next.config.ts           # Next.js configuration
+│   └── backend/                     # FastAPI Clean Architecture
+│       ├── main.py                  # FastAPI entry point
+│       ├── src/
+│       │   ├── common/              # Shared utilities
+│       │   │   ├── api.py           # Common routes
+│       │   │   └── dto.py           # Shared DTOs
+│       │   ├── pdf/                 # PDF processing module
+│       │   │   ├── api.py           # PDF routes
+│       │   │   ├── dto.py           # PDF DTOs
+│       │   │   └── services.py      # PDF business logic
+│       │   └── quiz/                # Quiz management module
+│       │       ├── api.py           # Quiz routes
+│       │       ├── dto.py           # Quiz DTOs
+│       │       └── services.py      # Quiz business logic
+│       ├── requirements.txt         # Python dependencies
+│       ├── venv/                    # Python virtual environment
+│       └── package.json             # Bun scripts for backend
+├── scripts/                         # Development scripts
+│   ├── start-servers.sh             # Start both servers
+│   ├── run-frontend.sh              # Frontend only
+│   └── run-backend.sh               # Backend only
+├── package.json                     # Root Bun workspace
+└── .cursor/
+    └── rules/
+        └── quiz-generator-guide.mdc # This file
+```
+
+## 🚀 Bun-First Philosophy
+
+### Why Bun for Everything
+This project uses **Bun as the primary JavaScript/TypeScript runtime and toolchain**, replacing Node.js wherever possible:
+
+- **🚀 Performance**: 4x faster startup than Node.js
+- **📦 All-in-One**: Runtime + Package Manager + Bundler + Test Runner
+- **🔧 Zero Config**: TypeScript/JSX support out of the box
+- **🌐 Web Standards**: Built-in fetch, WebSocket, ReadableStream
+- **⚡ Hot Reloading**: Fast development experience
+
+### Bun Usage Patterns
+
+#### Package Management
+```bash
+# Install dependencies (faster than npm/yarn)
+bun install
+
+# Add packages
+bun add @tanstack/react-query zustand
+
+# Run scripts
+bun run dev
+bun run build
+bun run test
+```
+
+#### Development Servers
+```bash
+# Frontend (Next.js)
+cd apps/frontend && bun dev
+
+# Or from root
+bun run dev:frontend
+```
+
+#### Build & Deploy
+```bash
+# Production build
+bun run build
+
+# Bundle for browsers
+bun build ./src/index.tsx --outdir ./dist
+```
+
+## 🎨 Design System & Animations
+
+### Design Tokens ([globals.css](mdc:apps/frontend/src/app/globals.css))
+- **Colors**: HSL-based semantic color system
+- **Spacing**: Consistent spacing scale
+- **Typography**: Geist Sans + Geist Mono fonts
+- **Radius**: 0.5rem default border radius
+- **Dark Mode**: Automatic color scheme adaptation
+
+### Animation Philosophy
+- **Smooth Transitions**: 300-500ms duration for UI state changes
+- **Staggered Animations**: Progressive reveal with delay intervals
+- **Micro-interactions**: Hover effects, loading states, success animations
+- **Step Transitions**: Fade + slide animations between quiz steps
+- **Performance**: Hardware-accelerated transforms only
+
+## 🔧 Development Guidelines
+
+### Code Organization
+- **Clean Architecture**: Separation of API, Services, and DTOs in backend
+- **Feature-Based**: Frontend components organized by feature
+- **Type Safety**: Zod schemas for runtime validation + TypeScript
+- **Error Handling**: Comprehensive error boundaries and user feedback
+
+### State Management
+- **Zustand**: Simple, typed global state
+- **Persistence**: Automatic localStorage for edited questions
+- **React Query**: Server state caching and synchronization
+- **Local State**: React hooks for component-specific state
+
+### API Design
+- **RESTful**: Clear resource-based endpoints
+- **FastAPI**: Automatic OpenAPI documentation
+- **Validation**: Pydantic models for request/response validation
+- **CORS**: Configured for development and production
+
+## 🚀 Deployment Architecture
+
+### Frontend (Vercel Recommended)
+- **Next.js App Router**: Server-side rendering
+- **Static Assets**: Optimized images and fonts
+- **Environment Variables**: `NEXT_PUBLIC_API_URL`
+
+### Backend (Railway/Render/Fly.io)
+- **FastAPI**: ASGI production server
+- **Environment Variables**: `OPENAI_API_KEY`
+- **Health Checks**: `/health` endpoint
+
+### Environment Configuration
+```bash
+# Root .env
+OPENAI_API_KEY=sk-your-openai-api-key-here
+NEXT_PUBLIC_API_URL=http://localhost:8000
+
+# apps/backend/.env
+OPENAI_API_KEY=sk-your-openai-api-key-here
+
+# apps/frontend/.env.local
+NEXT_PUBLIC_API_URL=http://localhost:8000
+```
+
+## 🎯 Stretch Goals (Implemented)
+- ✅ **Mobile Responsive**: Tailwind CSS responsive design
+- ✅ **Animations**: Smooth transitions and micro-interactions
+- ✅ **Persistence**: localStorage for edited questions
+- ✅ **Loading States**: Progressive loading with feedback
+- ⚠️ **Streaming**: OpenAI streaming API (future enhancement)
+
+## 🔍 Key Files Reference
+- [Main App](mdc:apps/frontend/src/app/page.tsx) - Step management with animations
+- [Quiz Store](mdc:apps/frontend/src/stores/quiz-store.ts) - Global state with persistence
+- [API Client](mdc:apps/frontend/src/lib/api.ts) - Type-safe API layer
+- [FastAPI Main](mdc:apps/backend/main.py) - Backend entry point
+- [Requirements](mdc:requirements.md) - Original project specification
+
+## ⚡ Quick Commands
+```bash
+# Start development (both servers)
+bun dev
+
+# Install dependencies
+bun install
+
+# Build for production
+bun run build
+
+# Run tests
+bun test
+
+# Format code
+bun run format
+
+# Type check
+bun run type-check
+```
+
+---
+**Remember**: This is a take-home project showcasing modern full-stack development with Bun, Next.js 15, FastAPI, and AI integration. Every architectural decision prioritizes developer experience, performance, and maintainability.
