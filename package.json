@@ -8,10 +8,11 @@
     "apps/backend"
   ],
   "scripts": {
-    "dev": "./start-dev.sh",
-    "dev:frontend": "cd apps/frontend && bun dev",
-    "dev:backend": "source apps/backend/venv/bin/activate && cd apps/backend && python -m fastapi dev main.py --reload",
-    "build": "cd apps/frontend && bun run build",
+    "dev": "./scripts/start-servers.sh",
+    "dev:frontend": "./scripts/run-frontend.sh",
+    "dev:backend": "./scripts/run-backend.sh",
+    "test": "./scripts/test-app.sh",
+    "build": "cd apps/frontend && NODE_OPTIONS=\"\" bun run build",
     "start": "cd apps/frontend && bun start",
     "lint": "cd apps/frontend && bun run lint",
     "type-check": "cd apps/frontend && bunx tsc --noEmit"

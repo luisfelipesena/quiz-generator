@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Change to the project root directory
+cd "$(dirname "$0")/.."
+
 # AI-Powered PDF Quiz Generator - Development Startup Script
 
 echo "🧪 Starting AI-Powered PDF Quiz Generator..."
@@ -31,8 +34,8 @@ BACKEND_PID=$!
 sleep 3
 
 echo "⚛️  Starting Next.js frontend server..."
-# Start frontend in background
-cd apps/frontend && bun dev &
+# Start frontend in background (disable debugger to avoid conflicts)
+cd apps/frontend && NODE_OPTIONS="" bun dev &
 FRONTEND_PID=$!
 
 echo ""

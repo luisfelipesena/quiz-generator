@@ -47,6 +47,12 @@ quiz-generator/
 │       ├── main.py        # FastAPI app
 │       ├── requirements.txt
 │       └── venv/          # Python virtual environment
+├── scripts/               # Development scripts
+│   ├── start-servers.sh   # Start both servers
+│   ├── run-frontend.sh    # Start frontend only
+│   ├── run-backend.sh     # Start backend only
+│   ├── start-dev.sh       # Alternative startup script
+│   └── test-app.sh        # Test application setup
 ├── package.json           # Monorepo root
 └── README.md
 ```
@@ -95,25 +101,48 @@ quiz-generator/
 
 ### Development
 
-1. **Start the backend server** (in one terminal):
-   ```bash
-   source apps/backend/venv/bin/activate
-   cd apps/backend
-   python -m fastapi dev main.py --reload
-   ```
-   Backend will be available at http://localhost:8000
+You have several options to start the development servers:
 
-2. **Start the frontend development server** (in another terminal):
-   ```bash
-   cd apps/frontend
-   bun dev
-   ```
-   Frontend will be available at http://localhost:3000
+#### Option 1: Start both servers together
+```bash
+bun dev
+# or
+./scripts/start-servers.sh
+```
 
-3. **Or start both servers together** (from root directory):
-   ```bash
-   bun dev
-   ```
+#### Option 2: Start servers individually
+**Backend** (in one terminal):
+```bash
+bun run dev:backend
+# or
+./scripts/run-backend.sh
+```
+
+**Frontend** (in another terminal):
+```bash
+bun run dev:frontend
+# or
+./scripts/run-frontend.sh
+```
+
+#### Option 3: Manual startup
+**Backend** (in one terminal):
+```bash
+cd apps/backend
+source venv/bin/activate
+python -m fastapi dev main.py --reload
+```
+
+**Frontend** (in another terminal):
+```bash
+cd apps/frontend
+NODE_OPTIONS="" bun dev
+```
+
+The servers will be available at:
+- Frontend: http://localhost:3000
+- Backend API: http://localhost:8000
+- API Documentation: http://localhost:8000/docs
 
 ### Building for Production
 
@@ -288,10 +317,29 @@ For a complete deployment, consider using:
 
 ### Common Issues
 
-1. **Build errors**: Make sure you have the latest version of Bun and Node.js
-2. **API connection issues**: Verify CORS settings and environment variables
-3. **OpenAI API errors**: Check your API key and quota limits
-4. **PDF extraction issues**: Some PDFs may not extract text properly - try with different files
+1. **VS Code/Cursor Debugger Conflicts**: 
+   - If you see Node.js debugger errors, use the provided scripts: `./scripts/start-servers.sh`
+   - Or use bun commands: `bun dev`, `bun run dev:frontend`, `bun run dev:backend`
+   - Or manually set `NODE_OPTIONS=""` before running commands
+   - Kill existing processes: `lsof -ti:3000 | xargs kill -9` and `lsof -ti:8000 | xargs kill -9`
+
+2. **Build errors**: 
+   - Make sure you have the latest version of Bun and Node.js
+   - Clear Node modules and reinstall: `rm -rf node_modules && bun install`
+
+3. **API connection issues**: 
+   - Verify CORS settings in `apps/backend/main.py`
+   - Check environment variables are set correctly
+   - Ensure backend is running on http://localhost:8000
+
+4. **OpenAI API errors**: 
+   - Check your API key is valid and has sufficient quota
+   - Verify the key is set in both `.env` and `apps/backend/.env`
+
+5. **PDF extraction issues**: 
+   - Some PDFs may not extract text properly (scanned images, complex layouts)
+   - Try with different PDF files that contain selectable text
+   - Check file size limits
 
 ### Development Tips
 
