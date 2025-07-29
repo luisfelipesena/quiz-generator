@@ -8,6 +8,8 @@ following a clean architecture pattern:
 - DTO Layer: Data transfer objects (dto.py files)
 """
 
+import os
+
 import uvicorn
 from dotenv import load_dotenv
 from fastapi import FastAPI
@@ -26,11 +28,34 @@ app = FastAPI(
     redoc_url="/redoc",
 )
 
+# CORS configuration for development and production
+allowed_origins = [
+    "http://localhost:3000",  # Local development
+    "http://127.0.0.1:3000",  # Alternative local development
+]
+
+# Add production origins from environment variable
+cors_origins = os.getenv("CORS_ORIGINS", "")
+if cors_origins:
+    # Support comma-separated origins for production
+    production_origins = [origin.strip() for origin in cors_origins.split(",")]
+    allowed_origins.extend(production_origins)
+
+# In production, you might want to be more restrictive
+environment = os.getenv("ENVIRONMENT", "development")
+if environment == "production":
+    # Only allow HTTPS origins in production
+    allowed_origins = [
+        origin
+        for origin in allowed_origins
+        if origin.startswith("https://") or origin.startswith("http://localhost")
+    ]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],
+    allow_origins=allowed_origins,
     allow_credentials=True,
-    allow_methods=["*"],
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allow_headers=["*"],
 )
 

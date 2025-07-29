@@ -217,43 +217,152 @@ app.add_middleware(
 
 ## 🚀 Deployment
 
-### Frontend Deployment (Vercel)
+### Quick Deploy Script
 
-1. **Connect your GitHub repository to Vercel**
-2. **Set build settings**:
-   - Build Command: `cd apps/frontend && bun run build`
-   - Output Directory: `apps/frontend/.next`
-   - Install Command: `bun install`
-3. **Set environment variables**:
-   - `NEXT_PUBLIC_API_URL`: Your deployed backend URL
+Use the automated deployment script:
 
-### Backend Deployment (Railway/Render/Fly.io)
+```bash
+# Run the deployment script
+bun run deploy
+# or
+./scripts/deploy.sh
+```
 
-1. **Create a `Dockerfile` in `apps/backend/`**:
-   ```dockerfile
-   FROM python:3.11-slim
-   
-   WORKDIR /app
-   
-   COPY requirements.txt .
-   RUN pip install --no-cache-dir -r requirements.txt
-   
-   COPY . .
-   
-   EXPOSE 8000
-   
-   CMD ["python", "-m", "fastapi", "run", "main.py", "--host", "0.0.0.0", "--port", "8000"]
+This script will:
+- ✅ Build and test your application locally
+- ✅ Commit and push changes to GitHub
+- ✅ Provide step-by-step deployment instructions
+
+### Manual Deployment
+
+#### Frontend Deployment (Vercel) - FREE TIER
+
+1. **Push your code to GitHub**
+2. **Go to [Vercel Dashboard](https://vercel.com/dashboard)**
+3. **Import your GitHub repository**
+4. **Configure build settings**:
+   - **Root Directory**: `apps/frontend`
+   - **Framework Preset**: Next.js
+   - **Build Command**: `bun run build`
+   - **Output Directory**: `.next`
+   - **Install Command**: `bun install`
+5. **Set environment variables**:
+   ```
+   NEXT_PUBLIC_API_URL=https://your-backend-name.onrender.com
+   ```
+6. **Deploy**: Vercel will automatically deploy on every push to main
+
+#### Backend Deployment (Render) - FREE TIER
+
+1. **Push your code to GitHub**
+2. **Go to [Render Dashboard](https://dashboard.render.com)**
+3. **Create New Web Service**
+4. **Connect your GitHub repository**
+5. **Configure service settings**:
+   - **Name**: `quiz-generator-api` (or your preferred name)
+   - **Root Directory**: `apps/backend`
+   - **Environment**: `Python 3`
+   - **Build Command**: `pip install -r requirements.txt`
+   - **Start Command**: `python -m fastapi run main.py --host 0.0.0.0 --port $PORT`
+   - **Plan**: Free
+6. **Set environment variables**:
+   ```
+   OPENAI_API_KEY=sk-your-openai-api-key-here
+   ```
+7. **Deploy**: Render will build and deploy your backend
+
+#### Update Frontend with Backend URL
+
+After your backend deploys on Render:
+
+1. **Copy the backend URL** (e.g., `https://quiz-generator-api.onrender.com`)
+2. **Update Vercel environment variables**:
+   - Go to your Vercel project settings
+   - Update `NEXT_PUBLIC_API_URL` with your Render backend URL
+   - Redeploy the frontend
+
+### Deployment Files Included
+
+The following deployment files are already configured:
+
+- ✅ `vercel.json` - Vercel configuration
+- ✅ `render.yaml` - Render service configuration  
+- ✅ `apps/backend/Dockerfile` - Docker configuration
+- ✅ `apps/backend/.dockerignore` - Docker ignore rules
+- ✅ `scripts/deploy.sh` - Automated deployment script
+
+### Environment Variables Setup
+
+#### Frontend (`apps/frontend/.env.local`)
+```bash
+# Copy from apps/frontend/env.example
+NEXT_PUBLIC_API_URL=https://your-backend-name.onrender.com
+```
+
+#### Backend (`apps/backend/.env`)
+```bash
+# Copy from apps/backend/env.example  
+OPENAI_API_KEY=sk-your-openai-api-key-here
+```
+
+### Free Tier Limitations
+
+#### Vercel Free Tier:
+- ✅ 100GB bandwidth per month
+- ✅ 100 deployments per month
+- ✅ Custom domains
+- ✅ Automatic HTTPS
+
+#### Render Free Tier:
+- ✅ 750 hours per month (enough for one app)
+- ⚠️ App sleeps after 15 minutes of inactivity
+- ⚠️ Cold start delays (10-30 seconds)
+- ✅ Custom domains
+- ✅ Automatic HTTPS
+
+### Production Optimization
+
+For better performance in production:
+
+1. **Upgrade to Render Paid Plans** ($7/month):
+   - No sleeping
+   - Faster builds
+   - More resources
+
+2. **Use CDN for Static Assets**:
+   - Vercel automatically provides CDN
+   - Consider Cloudflare for additional optimization
+
+3. **Monitor Performance**:
+   - Vercel Analytics (built-in)
+   - Render Metrics (built-in)
+
+### Troubleshooting Deployment
+
+#### Common Issues:
+
+1. **Build fails on Vercel**:
+   ```bash
+   # Check build locally first
+   cd apps/frontend
+   bun run build
    ```
 
-2. **Set environment variables** in your deployment platform:
-   - `OPENAI_API_KEY`: Your OpenAI API key
+2. **Backend fails on Render**:
+   ```bash
+   # Test backend locally
+   cd apps/backend
+   python -m fastapi run main.py
+   ```
 
-### Full-Stack Deployment
+3. **CORS errors**:
+   - Update `allow_origins` in `apps/backend/main.py`
+   - Add your Vercel domain to the CORS configuration
 
-For a complete deployment, consider using:
-- **Vercel** for frontend + **Railway** for backend
-- **Netlify** for frontend + **Render** for backend
-- **Docker Compose** for both services
+4. **Environment variables not working**:
+   - Double-check variable names (case-sensitive)
+   - Ensure `NEXT_PUBLIC_` prefix for frontend vars
+   - Redeploy after changing environment variables
 
 ## 📚 Next Steps for Validation
 

@@ -33,7 +33,13 @@
     "format:backend": "cd apps/backend && source venv/bin/activate && bun run format",
     "type-check": "bun run type-check:frontend && bun run type-check:backend",
     "type-check:frontend": "cd apps/frontend && bunx tsc --noEmit",
-    "type-check:backend": "cd apps/backend && source venv/bin/activate && bun run type-check"
+    "type-check:backend": "cd apps/backend && source venv/bin/activate && bun run type-check",
+    "deploy": "./scripts/deploy.sh",
+    "deploy:check": "./scripts/check-deployment.sh",
+    "deploy:frontend": "cd apps/frontend && vercel --prod",
+    "deploy:backend": "echo '🚀 Push your code to GitHub and deploy via Render dashboard'",
+    "build:docker": "cd apps/backend && docker build -t quiz-generator-api .",
+    "preview": "bun run build && bun run start"
   },
   "devDependencies": {
     "@types/node": "^20.0.0"
