@@ -1,0 +1,22 @@
+{
+  "name": "quiz-generator",
+  "version": "1.0.0",
+  "description": "AI-powered PDF quiz generator",
+  "private": true,
+  "workspaces": [
+    "apps/frontend",
+    "apps/backend"
+  ],
+  "scripts": {
+    "dev": "./start-dev.sh",
+    "dev:frontend": "cd apps/frontend && bun dev",
+    "dev:backend": "source apps/backend/venv/bin/activate && cd apps/backend && python -m fastapi dev main.py --reload",
+    "build": "cd apps/frontend && bun run build",
+    "start": "cd apps/frontend && bun start",
+    "lint": "cd apps/frontend && bun run lint",
+    "type-check": "cd apps/frontend && bunx tsc --noEmit"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0"
+  }
+}

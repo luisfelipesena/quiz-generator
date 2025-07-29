@@ -1,0 +1,7 @@
+fastapi[all]==0.115.5
+pydantic==2.10.5
+python-multipart==0.0.17
+openai==1.58.1
+PyPDF2==3.0.1
+python-dotenv==1.0.1
+httpx==0.28.1

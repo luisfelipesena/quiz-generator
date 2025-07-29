@@ -1,0 +1,16 @@
+{
+  "name": "backend",
+  "version": "1.0.0",
+  "description": "FastAPI backend for quiz generator",
+  "main": "main.py",
+  "scripts": {
+    "dev": "python -m fastapi dev main.py --reload",
+    "start": "python -m fastapi run main.py",
+    "build": "echo 'Build complete'",
+    "lint": "ruff check .",
+    "format": "ruff format .",
+    "type-check": "mypy ."
+  },
+  "dependencies": {},
+  "devDependencies": {}
+}
