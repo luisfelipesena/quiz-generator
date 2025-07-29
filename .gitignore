@@ -11,3 +11,5 @@ node_modules
 .env.production
 __pycache__
 __pycache__/*
+
+CLAUDE.md
