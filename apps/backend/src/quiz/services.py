@@ -4,7 +4,7 @@ Quiz services - Business logic for quiz operations
 
 import json
 import os
-from typing import AsyncGenerator, Dict, List, Optional
+from typing import AsyncGenerator, Dict, List, Optional, Tuple
 
 from fastapi import HTTPException
 from openai import OpenAI
@@ -118,7 +118,7 @@ class QuizGenerationService:
                     question_text = str(q["question"]).strip()
                     correct_answer = str(q["answer"]).strip()
                     options = q.get("options", [])
-                    
+
                     # Validate that correct answer is in options
                     if options and correct_answer not in options:
                         # Try to find a case-insensitive match
@@ -127,13 +127,13 @@ class QuizGenerationService:
                             if option.lower() == correct_answer.lower():
                                 matching_option = option
                                 break
-                        
+
                         if matching_option:
                             correct_answer = matching_option
                         else:
                             # Skip this question if correct answer not in options
                             continue
-                    
+
                     questions.append(
                         QuestionAnswer(
                             id=str(i + 1),
@@ -208,23 +208,35 @@ class QuizManagementService:
 
     def __init__(self):
         # In-memory storage for questions by session (in production, use a database)
-        # Format: {session_id: {question_id: QuestionAnswer}}
-        self.sessions_storage: Dict[str, Dict[str, QuestionAnswer]] = {}
+        # Format: {session_id: (quiz_title, {question_id: QuestionAnswer})}
+        self.sessions_storage: Dict[str, Tuple[str, Dict[str, QuestionAnswer]]] = {}
 
-    def store_questions(self, questions: List[QuestionAnswer], session_id: str = "default") -> None:
+    def store_questions(
+        self,
+        questions: List[QuestionAnswer],
+        session_id: str = "default",
+        quiz_title: str = "General Quiz",
+    ) -> None:
         """Store questions in memory storage by session"""
         if session_id not in self.sessions_storage:
-            self.sessions_storage[session_id] = {}
-        
-        for question in questions:
-            self.sessions_storage[session_id][question.id] = question
+            self.sessions_storage[session_id] = (quiz_title, {})
 
-    def get_question_by_id(self, question_id: str, session_id: str = "default") -> Optional[QuestionAnswer]:
+        self.sessions_storage[session_id] = (quiz_title, {q.id: q for q in questions})
+
+    def get_question_by_id(
+        self, question_id: str, session_id: str = "default"
+    ) -> Optional[QuestionAnswer]:
         """Retrieve a question by its ID for a specific session"""
-        session_questions = self.sessions_storage.get(session_id, {})
-        return session_questions.get(question_id)
+        session_data = self.sessions_storage.get(session_id)
+        if not session_data:
+            return None
 
-    def update_question(self, question_update: QuestionUpdateRequest, session_id: str = "default") -> QuestionAnswer:
+        _, questions_dict = session_data
+        return questions_dict.get(question_id)
+
+    def update_question(
+        self, question_update: QuestionUpdateRequest, session_id: str = "default"
+    ) -> QuestionAnswer:
         """
         Update an existing question for a specific session
 
@@ -238,15 +250,22 @@ class QuizManagementService:
         Raises:
             HTTPException: If question not found
         """
-        session_questions = self.sessions_storage.get(session_id, {})
-        if question_update.id not in session_questions:
+        session_data = self.sessions_storage.get(session_id)
+        if not session_data:
+            raise HTTPException(status_code=404, detail="Session not found")
+
+        quiz_title, questions_dict = session_data
+        if question_update.id not in questions_dict:
             raise HTTPException(status_code=404, detail="Question not found")
 
         # Validate that the correct answer is one of the options
-        if question_update.options and question_update.answer not in question_update.options:
+        if (
+            question_update.options
+            and question_update.answer not in question_update.options
+        ):
             raise HTTPException(
-                status_code=400, 
-                detail="Correct answer must be one of the multiple choice options"
+                status_code=400,
+                detail="Correct answer must be one of the multiple choice options",
             )
 
         updated_question = QuestionAnswer(
@@ -256,27 +275,32 @@ class QuizManagementService:
             options=question_update.options,
         )
 
-        self.sessions_storage[session_id][question_update.id] = updated_question
+        questions_dict[question_update.id] = updated_question
+        self.sessions_storage[session_id] = (quiz_title, questions_dict)
         return updated_question
 
-    def check_answer(self, answer_request: AnswerRequest, session_id: str = "default") -> AnswerResponse:
+    def check_answer(self, answer_request: AnswerRequest) -> AnswerResponse:
         """
-        Check if the provided answer is correct for a specific session
+        Check if the provided answer is correct. This method is stateless.
 
         Args:
-            answer_request: The answer to check
-            session_id: The session ID
+            answer_request: The answer to check, including the list of questions.
 
         Returns:
             AnswerResponse with correctness and explanation
 
         Raises:
-            HTTPException: If question not found
+            HTTPException: If question not found in the provided list
         """
-        question = self.get_question_by_id(answer_request.question_id, session_id)
+        question = next(
+            (q for q in answer_request.questions if q.id == answer_request.question_id),
+            None,
+        )
 
         if not question:
-            raise HTTPException(status_code=404, detail="Question not found")
+            raise HTTPException(
+                status_code=404, detail="Question not found in provided quiz context"
+            )
 
         correct_answer = question.answer
         user_answer = answer_request.user_answer.strip()
@@ -305,14 +329,13 @@ class QuizManagementService:
         )
 
     async def get_streaming_feedback(
-        self, answer_request: AnswerRequest, session_id: str = "default"
+        self, answer_request: AnswerRequest
     ) -> AsyncGenerator[str, None]:
         """
-        Get personalized streaming feedback for incorrect answers using OpenAI
+        Get personalized streaming feedback. This method is stateless.
 
         Args:
-            answer_request: The answer to check and provide feedback for
-            session_id: The session ID
+            answer_request: The answer request, including the list of questions.
 
         Yields:
             Streaming text chunks with personalized feedback
@@ -320,10 +343,15 @@ class QuizManagementService:
         Raises:
             HTTPException: If question not found or streaming fails
         """
-        question = self.get_question_by_id(answer_request.question_id, session_id)
+        question = next(
+            (q for q in answer_request.questions if q.id == answer_request.question_id),
+            None,
+        )
 
         if not question:
-            raise HTTPException(status_code=404, detail="Question not found")
+            raise HTTPException(
+                status_code=404, detail="Question not found in provided quiz context"
+            )
 
         correct_answer = question.answer
         user_answer = answer_request.user_answer.strip()

@@ -1,16 +1,22 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Check, X, ArrowRight } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useQuizAnswer } from '@/hooks/useQuizMutations'
 import { useStreamingFeedback } from '@/hooks/useStreamingFeedback'
 import { useQuizStore } from '@/stores/quiz-store'
-import { BackArrowIcon } from '@/components/icons'
+import { BackArrowIcon, SuccessIcon } from '@/components/icons'
+import { PdfIcon } from '@/components/icons/pdf-icon'
 
 export function Quiz() {
   const [selectedAnswer, setSelectedAnswer] = useState<string>('')
   const [hasAnswered, setHasAnswered] = useState(false)
+  const [isClient, setIsClient] = useState(false)
+
+  useEffect(() => {
+    setIsClient(true)
+  }, [])
   
   const {
     currentQuestionIndex,
@@ -18,6 +24,7 @@ export function Quiz() {
     getCurrentQuestion,
     nextQuestion,
     isQuizComplete,
+    quizTitle,
   } = useQuizStore()
 
   const currentQuestion = getCurrentQuestion()
@@ -59,10 +66,26 @@ export function Quiz() {
     reset()
   }
 
+  if (!isClient) {
+    // Render nothing on the server to avoid hydration mismatch
+    return null
+  }
+
   if (!currentQuestion) {
     return (
-      <div className="max-w-2xl mx-auto text-center">
-        <p>No questions available</p>
+      <div className="max-w-2xl mx-auto text-center space-y-4 pt-16">
+        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6">
+          <h2 className="text-lg font-medium text-yellow-800 mb-2">No Questions Available</h2>
+          <p className="text-yellow-700 mb-4">
+            It looks like there are no questions to display. Please go back and generate some questions first.
+          </p>
+          <Button 
+            onClick={() => useQuizStore.getState().setCurrentStep('upload')}
+            className="bg-yellow-600 hover:bg-yellow-700"
+          >
+            Start Over
+          </Button>
+        </div>
       </div>
     )
   }
@@ -81,14 +104,14 @@ export function Quiz() {
           </button>
           <div className="flex items-center gap-2">
             <div className="w-6 h-6 bg-red-500 rounded flex items-center justify-center">
-              <span className="text-white text-xs font-medium">M</span>
+              <PdfIcon width={16} height={16} className="text-white" />
             </div>
-            <h1 className="text-xl font-semibold text-foreground">Mathematics Quiz</h1>
+            <h1 className="text-xl font-semibold text-foreground">{quizTitle}</h1>
           </div>
         </div>
       </div>
 
-      <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-8">
+      <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-8 max-h-[80vh] overflow-y-auto">
         <div className="space-y-6">
           <div className="space-y-2">
             <p className="text-sm text-gray-500">Question {currentQuestionIndex + 1}</p>
@@ -167,7 +190,7 @@ export function Quiz() {
             }`}>
               {isCorrect ? (
                 <div className="space-y-2">
-                  <Check className="w-12 h-12 text-green-600 mx-auto" />
+                  <SuccessIcon className="w-12 h-12 text-green-600 mx-auto" />
                   <p className="text-lg font-medium text-green-700">Correct!</p>
                 </div>
               ) : (

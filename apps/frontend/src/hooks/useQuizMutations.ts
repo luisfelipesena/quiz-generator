@@ -8,18 +8,20 @@ import { useSessionId } from './useSessionId'
  * Hook for handling PDF upload and quiz generation
  */
 export function useUploadPdfMutation() {
-  const { setQuestions, setCurrentStep } = useQuizStore()
+  const { setQuiz, setCurrentStep } = useQuizStore()
   const sessionId = useSessionId()
   
   return useMutation<QuizResponse, ApiError, File>({
     mutationFn: async (file: File) => {
-      // Start generating step immediately
-      setCurrentStep('generating')
       return api.uploadPdfAndGenerateQuiz(file, sessionId)
     },
+    onMutate: () => {
+      // Only change to generating state when mutation actually starts
+      setCurrentStep('generating')
+    },
     onSuccess: (data: QuizResponse) => {
-      setQuestions(data.questions)
-      toast.success(`Generated ${data.questions.length} questions successfully!`)
+      setQuiz(data.quiz_title, data.questions)
+      toast.success(`Generated ${data.questions.length} questions for "${data.quiz_title}"!`)
       // Show success for a moment, then transition to edit
       setTimeout(() => {
         setCurrentStep('edit')
@@ -50,10 +52,8 @@ export function useUploadPdfMutation() {
  * Hook for checking quiz answers
  */
 export function useCheckAnswerMutation() {
-  const sessionId = useSessionId()
-  
   return useMutation<AnswerResponse, ApiError, AnswerRequest>({
-    mutationFn: (answerRequest: AnswerRequest) => api.checkAnswer(answerRequest, sessionId),
+    mutationFn: (answerRequest: AnswerRequest) => api.checkAnswer(answerRequest),
     onError: (error: ApiError) => {
       console.error('Answer check failed:', error)
       
@@ -73,19 +73,19 @@ export function useCheckAnswerMutation() {
  * Combined hook for quiz-taking workflow
  */
 export function useQuizAnswer() {
-  const { submitAnswer } = useQuizStore()
+  const { questions, submitAnswer } = useQuizStore()
   const checkAnswerMutation = useCheckAnswerMutation()
 
-  const checkAnswer = (questionId: string, userAnswer: string) => {
+  const checkAnswer = async (questionId: string, userAnswer: string) => {
     const answerRequest: AnswerRequest = {
       question_id: questionId,
       user_answer: userAnswer,
+      questions,
     }
     
-    return checkAnswerMutation.mutateAsync(answerRequest).then((result) => {
-      submitAnswer(questionId, userAnswer, result)
-      return result
-    })
+    const result = await checkAnswerMutation.mutateAsync(answerRequest)
+    submitAnswer(questionId, userAnswer, result)
+    return result
   }
 
   return {

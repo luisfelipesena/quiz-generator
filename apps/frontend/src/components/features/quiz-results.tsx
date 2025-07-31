@@ -9,6 +9,7 @@ import { DropdownMenu, DropdownMenuItem } from '@/components/ui/dropdown-menu'
 import { UserNameModal } from '@/components/features/user-name-modal'
 import { useQuizStore } from '@/stores/quiz-store'
 import { useShareResults } from '@/hooks/useShareResults'
+import { clearSession } from '@/hooks/useSessionId'
 
 export function QuizResults() {
   const { questions, answers, getScore, resetQuiz, userName } = useQuizStore()
@@ -63,7 +64,12 @@ export function QuizResults() {
     }
   }
 
-
+  const handleTakeAnotherQuiz = () => {
+    resetQuiz()
+    clearSession()
+    // Full page reload to ensure a clean state and new session
+    window.location.reload()
+  }
 
   return (
     <>
@@ -73,7 +79,7 @@ export function QuizResults() {
         onSuccess={handleNameModalSuccess}
       />
 
-      <div className="max-w-3xl mx-auto space-y-8">
+      <div className={`max-w-3xl mx-auto space-y-8 ${showNameModal ? 'blur-sm' : ''} max-h-[90vh] overflow-y-auto`}>
         {/* Results Header */}
         <div className="text-center space-y-6">
           <div className="inline-flex items-center justify-center w-24 h-24">
@@ -148,7 +154,7 @@ export function QuizResults() {
           </DropdownMenu>
           
           <Button 
-            onClick={resetQuiz}
+            onClick={handleTakeAnotherQuiz}
             variant="outline"
             size="lg"
             className="px-6 py-3 text-base font-medium rounded-lg flex items-center gap-2"

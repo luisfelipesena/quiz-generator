@@ -15,6 +15,7 @@ interface QuizAnswer {
 interface QuizState {
   // Current step in the quiz flow
   currentStep: QuizStep
+  quizTitle: string
   
   // User information
   userName: string
@@ -33,7 +34,7 @@ interface QuizActions {
   // Actions
   setCurrentStep: (step: QuizStep) => void
   setUserName: (name: string) => void
-  setQuestions: (questions: QuestionAnswer[]) => void
+  setQuiz: (title: string, questions: QuestionAnswer[]) => void
   updateQuestion: (questionId: string, questionUpdate: QuestionUpdateRequest, sessionId?: string) => void
   
   // Quiz actions
@@ -54,6 +55,7 @@ export const useQuizStore = create<QuizState & QuizActions>()(
       (set, get) => ({
       // Initial state
       currentStep: 'upload',
+      quizTitle: '',
       userName: '',
       questions: [],
       editedQuestions: {},
@@ -62,10 +64,20 @@ export const useQuizStore = create<QuizState & QuizActions>()(
       showFeedback: false,
 
       // Actions
-      setCurrentStep: (step) => set({ currentStep: step }),
+      setCurrentStep: (step) => {
+        const { questions } = get()
+        // Prevent navigation to quiz step if no questions available
+        if (step === 'quiz' && questions.length === 0) {
+          console.warn('Cannot navigate to quiz: No questions available')
+          set({ currentStep: 'upload' })
+          return
+        }
+        set({ currentStep: step })
+      },
       setUserName: (name) => set({ userName: name }),
       
-      setQuestions: (questions) => set({ 
+      setQuiz: (title, questions) => set({
+        quizTitle: title,
         questions,
         editedQuestions: {},
         currentQuestionIndex: 0,
@@ -97,13 +109,22 @@ export const useQuizStore = create<QuizState & QuizActions>()(
         }
       },
 
-      startQuiz: () =>
-        set({
-          currentStep: 'quiz',
-          currentQuestionIndex: 0,
-          answers: [],
-          showFeedback: false,
-        }),
+      startQuiz: () => {
+        const { questions } = get()
+        // Only start quiz if there are questions available
+        if (questions.length > 0) {
+          set({
+            currentStep: 'quiz',
+            currentQuestionIndex: 0,
+            answers: [],
+            showFeedback: false,
+          })
+        } else {
+          console.warn('Cannot start quiz: No questions available')
+          // Redirect back to upload step if no questions
+          set({ currentStep: 'upload' })
+        }
+      },
 
       submitAnswer: (questionId, userAnswer, result) =>
         set((state) => ({
@@ -135,6 +156,7 @@ export const useQuizStore = create<QuizState & QuizActions>()(
       resetQuiz: () =>
         set({
           currentStep: 'upload',
+          quizTitle: '',
           userName: '',
           questions: [],
           editedQuestions: {},
@@ -172,6 +194,7 @@ export const useQuizStore = create<QuizState & QuizActions>()(
         partialize: (state) => ({
           editedQuestions: state.editedQuestions,
           questions: state.questions,
+          quizTitle: state.quizTitle,
           userName: state.userName,
         }),
       }

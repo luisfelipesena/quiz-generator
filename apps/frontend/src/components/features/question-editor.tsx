@@ -52,7 +52,7 @@ export function QuestionEditor({ question, index }: QuestionEditorProps) {
   const isCorrectAnswer = (option: string) => option === editedQuestion.answer
 
   return (
-    <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
+    <div className="bg-white p-4 sm:p-6 rounded-xl border border-gray-200 shadow-sm">
       <div className="space-y-4">
 
         <div className="flex items-start justify-between">
@@ -81,12 +81,12 @@ export function QuestionEditor({ question, index }: QuestionEditorProps) {
           {editedQuestion.options && editedQuestion.options.length > 0 && (
             <div className="space-y-2">
               {editedQuestion.options.map((option, optionIndex) => (
-                <div key={optionIndex} className="flex items-center gap-3">
+                <div key={optionIndex} className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-3">
                   <span className="text-sm text-gray-500 min-w-[60px]">
                     Option {optionIndex + 1}:
                   </span>
                   {isEditing ? (
-                    <div className="flex-1 flex items-center gap-2">
+                    <div className="w-full flex-1 flex items-center gap-2">
                       <Input
                         value={option}
                         onChange={(e) => updateOption(optionIndex, e.target.value)}
@@ -100,8 +100,8 @@ export function QuestionEditor({ question, index }: QuestionEditorProps) {
                       )}
                     </div>
                   ) : (
-                    <div className="flex-1 flex items-center gap-2">
-                      <div className={`flex-1 h-10 px-3 flex items-center rounded-lg border ${isCorrectAnswer(option) ? 'border-green-500 bg-green-50' : 'border-gray-300 bg-gray-50'}`}>
+                    <div className="w-full flex-1 flex items-center gap-2">
+                      <div className={`w-full flex-1 h-10 px-3 flex items-center rounded-lg border ${isCorrectAnswer(option) ? 'border-green-500 bg-green-50' : 'border-gray-300 bg-gray-50'}`}>
                         <span className={`text-sm ${isCorrectAnswer(option) ? 'text-green-700 font-medium' : 'text-gray-700'}`}>
                           {option}
                         </span>
@@ -181,15 +181,17 @@ export function QuestionEditList() {
 
   return (
     <div className="max-w-3xl mx-auto space-y-8">
-      <button
-        onClick={handleBack}
-        className="flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors"
-      >
-        <BackArrowIcon width={20} height={20} />
-        <span className="text-sm font-medium">Back</span>
-      </button>
-
       <div className="space-y-4">
+        <div className="flex items-center gap-3">
+          <button
+            onClick={handleBack}
+            className="flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors"
+          >
+            <BackArrowIcon width={20} height={20} />
+            <span className="text-sm font-medium">Back</span>
+          </button>
+        </div>
+
         <div className="flex items-center gap-3">
           <UnstuckIcon 
             width={24} 

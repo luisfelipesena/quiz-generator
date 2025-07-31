@@ -150,13 +150,6 @@ You only need to do this once.
 - Check the FastAPI automatic docs at `/docs` for API testing.
 - Use the browser dev tools to monitor network requests.
 
-## 🤝 Contributing
-
-1.  Fork the repository
-2.  Create a feature branch
-3.  Make your changes
-4.  Submit a pull request
-
 ## 📄 License
 
 This project is open source and available under the [MIT License](LICENSE).

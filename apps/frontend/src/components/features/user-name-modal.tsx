@@ -26,15 +26,10 @@ interface UserNameModalProps {
 }
 
 export function UserNameModal({ isOpen, onSuccess }: UserNameModalProps) {
-  const { form, handleSubmit, isValid, isSubmitting } = useUserNameForm()
+  const { form, handleSubmit, isValid, isSubmitting } = useUserNameForm(onSuccess)
 
   const onSubmit = async () => {
-    try {
-      await handleSubmit()
-      onSuccess()
-    } catch (error) {
-      console.error('Error submitting form:', error)
-    }
+    await handleSubmit()
   }
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -67,7 +62,7 @@ export function UserNameModal({ isOpen, onSuccess }: UserNameModalProps) {
       </ModalHeader>
 
       <Form {...form}>
-        <form onSubmit={handleSubmit} className="space-y-0">
+        <form onSubmit={(e) => { e.preventDefault(); onSubmit() }} className="space-y-0">
           <ModalContent>
             <FormField
               control={form.control}

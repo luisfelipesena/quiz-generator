@@ -23,8 +23,8 @@ export function DropPdfIcon({ width = 64, height = 64, className }: DropPdfIconP
       <path
         d="M11.6059 2.53522H32.185C33.4918 2.53522 34.7677 2.93416 35.8422 3.6778L47.2905 11.6006C48.5441 12.4682 50.0325 12.9327 51.5571 12.9327H87.1606C90.7096 12.9329 93.5864 15.8104 93.5864 19.3594V65.4122C93.5863 70.2922 89.6305 74.2481 84.7504 74.2481H14.0161C9.13596 74.2481 5.1792 70.2922 5.17914 65.4122V8.96198C5.17914 5.41279 8.05671 2.53522 11.6059 2.53522Z"
         stroke="white"
-        stroke-opacity="0.08"
-        stroke-width="1.07106"
+        strokeOpacity="0.08"
+        strokeWidth="1.07106"
       />
       <g filter="url(#filter0_di_12_3246)">
         <rect
@@ -42,8 +42,8 @@ export function DropPdfIcon({ width = 64, height = 64, className }: DropPdfIconP
           rx="3.41394"
           transform="matrix(0.991795 0.127837 -0.124157 0.992263 51.4804 5.29525)"
           stroke="black"
-          stroke-opacity="0.04"
-          stroke-width="0.296865"
+          strokeOpacity="0.04"
+          strokeWidth="0.296865"
         />
       </g>
       <path
@@ -66,8 +66,8 @@ export function DropPdfIcon({ width = 64, height = 64, className }: DropPdfIconP
           rx="3.41394"
           transform="matrix(0.97437 -0.224951 0.228564 0.973529 3.51598 19.31)"
           stroke="black"
-          stroke-opacity="0.04"
-          stroke-width="0.296865"
+          strokeOpacity="0.04"
+          strokeWidth="0.296865"
         />
       </g>
       <path
@@ -90,8 +90,8 @@ export function DropPdfIcon({ width = 64, height = 64, className }: DropPdfIconP
           rx="3.41394"
           transform="matrix(1 0 0.00370914 0.999993 27.0057 5.02533)"
           stroke="black"
-          stroke-opacity="0.04"
-          stroke-width="0.296865"
+          strokeOpacity="0.04"
+          strokeWidth="0.296865"
         />
       </g>
       <path
@@ -110,9 +110,9 @@ export function DropPdfIcon({ width = 64, height = 64, className }: DropPdfIconP
           width="56.7469"
           height="56.9099"
           filterUnits="userSpaceOnUse"
-          color-interpolation-filters="sRGB"
+          colorInterpolationFilters="sRGB"
         >
-          <feFlood flood-opacity="0" result="BackgroundImageFix" />
+          <feFlood floodOpacity="0" result="BackgroundImageFix" />
           <feColorMatrix
             in="SourceAlpha"
             type="matrix"
@@ -144,9 +144,9 @@ export function DropPdfIcon({ width = 64, height = 64, className }: DropPdfIconP
           width="60.0695"
           height="59.8867"
           filterUnits="userSpaceOnUse"
-          color-interpolation-filters="sRGB"
+          colorInterpolationFilters="sRGB"
         >
-          <feFlood flood-opacity="0" result="BackgroundImageFix" />
+          <feFlood floodOpacity="0" result="BackgroundImageFix" />
           <feColorMatrix
             in="SourceAlpha"
             type="matrix"
@@ -178,9 +178,9 @@ export function DropPdfIcon({ width = 64, height = 64, className }: DropPdfIconP
           width="52.4752"
           height="52.3316"
           filterUnits="userSpaceOnUse"
-          color-interpolation-filters="sRGB"
+          colorInterpolationFilters="sRGB"
         >
-          <feFlood flood-opacity="0" result="BackgroundImageFix" />
+          <feFlood floodOpacity="0" result="BackgroundImageFix" />
           <feColorMatrix
             in="SourceAlpha"
             type="matrix"
@@ -213,8 +213,8 @@ export function DropPdfIcon({ width = 64, height = 64, className }: DropPdfIconP
           y2="53.5889"
           gradientUnits="userSpaceOnUse"
         >
-          <stop stop-color="#E1E1E1" />
-          <stop offset="1" stop-color="#AAAAAA" />
+          <stop stopColor="#E1E1E1" />
+          <stop offset="1" stopColor="#AAAAAA" />
         </linearGradient>
       </defs>
     </svg>

@@ -6,18 +6,32 @@ import { QuestionEditList } from '@/components/features/question-editor'
 import { Quiz } from '@/components/features/quiz'
 import { QuizResults } from '@/components/features/quiz-results'
 import { useQuizStore } from '@/stores/quiz-store'
+import { Button } from '@/components/ui/button'
+import { useSyncQuizState } from '@/hooks/useSyncQuizState'
 
 export default function Home() {
-  const { currentStep } = useQuizStore()
+  const { currentStep, questions, setCurrentStep } = useQuizStore()
+  useSyncQuizState()
+
+  const hasExistingQuiz = questions.length > 0
 
   return (
     <div className="w-full">
-      <div className="relative min-h-[80vh] flex items-center justify-center">
+      <div className="relative min-h-[80vh] flex items-center justify-center pt-16">
         {/* Step transitions with animation */}
         <div className={`transition-all duration-500 ease-in-out w-full ${
           currentStep === 'upload' ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-[-100%] absolute inset-0 pointer-events-none'
         }`}>
           <PdfUpload />
+
+          {hasExistingQuiz && currentStep === 'upload' && (
+            <div className="text-center mt-8">
+              <p className="text-gray-600 mb-4">You have an existing quiz.</p>
+              <Button onClick={() => setCurrentStep('edit')} size="lg">
+                Continue Quiz
+              </Button>
+            </div>
+          )}
         </div>
         
         <div className={`transition-all duration-500 ease-in-out w-full ${
@@ -28,7 +42,6 @@ export default function Home() {
             subtitle="Reading your materials..."
             showNextButton={false}
             nextStep="edit"
-            nextLabel="Continue"
           />
         </div>
         
@@ -46,7 +59,6 @@ export default function Home() {
             subtitle="Preparing the quiz so you can now practice..."
             showNextButton={false}
             nextStep="quiz"
-            nextLabel="Start Quiz"
           />
         </div>
         

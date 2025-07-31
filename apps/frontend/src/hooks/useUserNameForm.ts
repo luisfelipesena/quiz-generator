@@ -3,7 +3,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { userNameSchema, type UserNameFormData } from '@/lib/validations'
 import { useQuizStore } from '@/stores/quiz-store'
 
-export function useUserNameForm() {
+export function useUserNameForm(onSuccess: () => void) {
   const { setUserName } = useQuizStore()
 
   const form = useForm<UserNameFormData>({
@@ -16,7 +16,7 @@ export function useUserNameForm() {
 
   const onSubmit = (data: UserNameFormData) => {
     setUserName(data.name)
-    return Promise.resolve()
+    onSuccess()
   }
 
   const handleSubmit = form.handleSubmit(onSubmit)

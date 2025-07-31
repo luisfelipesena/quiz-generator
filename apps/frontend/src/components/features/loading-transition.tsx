@@ -16,16 +16,8 @@ interface LoadingTransitionProps {
 export function LoadingTransition({ title, subtitle, showNextButton = false, nextStep, nextLabel = "Next" }: LoadingTransitionProps) {
   const { setCurrentStep } = useQuizStore()
 
-  // Auto-transition after 2 seconds if nextStep is provided
-  React.useEffect(() => {
-    if (nextStep) {
-      const timer = setTimeout(() => {
-        setCurrentStep(nextStep)
-      }, 2000)
-      
-      return () => clearTimeout(timer)
-    }
-  }, [nextStep, setCurrentStep])
+  // Removed auto-transition to prevent unwanted navigation
+  // Users must now explicitly click the next button to proceed
 
   const handleNext = () => {
     if (nextStep) {

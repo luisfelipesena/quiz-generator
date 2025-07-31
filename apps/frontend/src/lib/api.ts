@@ -14,12 +14,14 @@ export const QuestionAnswerSchema = z.object({
 })
 
 export const QuizResponseSchema = z.object({
+  quiz_title: z.string(),
   questions: z.array(QuestionAnswerSchema),
 })
 
 export const AnswerRequestSchema = z.object({
   question_id: z.string(),
   user_answer: z.string(),
+  questions: z.array(QuestionAnswerSchema),
 })
 
 export const AnswerResponseSchema = z.object({
@@ -179,12 +181,9 @@ export const api = {
     return handleApiResponse(response, QuestionAnswerSchema)
   },
 
-  async checkAnswer(answerRequest: AnswerRequest, sessionId?: string): Promise<AnswerResponse> {
+  async checkAnswer(answerRequest: AnswerRequest): Promise<AnswerResponse> {
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
-    }
-    if (sessionId) {
-      headers['X-Session-Id'] = sessionId
     }
 
     const response = await fetch(`${API_BASE_URL}/quiz/check-answer`, {
@@ -196,16 +195,47 @@ export const api = {
     return handleApiResponse(response, AnswerResponseSchema)
   },
 
-  // ========================================================================
-  // Legacy Methods (for backward compatibility - will be removed)
-  // ========================================================================
-  
-  /** @deprecated Use uploadPdfAndGenerateQuiz instead */
-  uploadPdf: async (file: File): Promise<QuizResponse> => {
-    console.warn('api.uploadPdf is deprecated. Use api.uploadPdfAndGenerateQuiz instead.')
-    return api.uploadPdfAndGenerateQuiz(file)
+  async checkAnswerStream(answerRequest: AnswerRequest): Promise<ReadableStream<Uint8Array>> {
+    const response = await fetch(`${API_BASE_URL}/quiz/check-answer-stream`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'text/event-stream',
+      },
+      body: JSON.stringify(answerRequest),
+    })
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}))
+      throw new ApiError(errorData.detail || 'Failed to stream feedback', response.status)
+    }
+    
+    if (!response.body) {
+      throw new Error('Response body is null')
+    }
+
+    return response.body
   },
+
+  async syncQuestions(questions: QuestionAnswer[], sessionId: string, quizTitle: string): Promise<void> {
+    const response = await fetch(`${API_BASE_URL}/quiz/sync`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Session-Id': sessionId,
+        'Quiz-Title': quizTitle,
+      },
+      body: JSON.stringify(questions),
+    })
+  
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}))
+      throw new Error(errorData.detail || 'Failed to sync questions')
+    }
+  }
 }
+
+
 
 // ============================================================================
 // API Configuration & Utils
@@ -216,5 +246,3 @@ export const API_CONFIG = {
   TIMEOUT: 30000, // 30 seconds
   RETRY_ATTEMPTS: 3,
 } as const
-
-export type ApiConfigType = typeof API_CONFIG
