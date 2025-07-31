@@ -4,7 +4,7 @@ Quiz services - Business logic for quiz operations
 
 import json
 import os
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, AsyncGenerator
 
 from fastapi import HTTPException
 from openai import OpenAI
@@ -199,6 +199,98 @@ class QuizManagementService:
         return AnswerResponse(
             correct=is_correct, correct_answer=correct_answer, explanation=explanation
         )
+
+    async def get_streaming_feedback(self, answer_request: AnswerRequest) -> AsyncGenerator[str, None]:
+        """
+        Get personalized streaming feedback for incorrect answers using OpenAI
+        
+        Args:
+            answer_request: The answer to check and provide feedback for
+            
+        Yields:
+            Streaming text chunks with personalized feedback
+            
+        Raises:
+            HTTPException: If question not found or streaming fails
+        """
+        question = self.get_question_by_id(answer_request.question_id)
+        
+        if not question:
+            raise HTTPException(status_code=404, detail="Question not found")
+        
+        correct_answer = question.answer
+        user_answer = answer_request.user_answer.strip()
+        
+        # Check if the user's answer matches the correct answer (case-insensitive)
+        is_correct = user_answer.lower() == correct_answer.lower()
+        
+        # If it's a multiple choice question, also check if any option matches
+        if not is_correct and question.options:
+            for option in question.options:
+                if (
+                    user_answer.lower() == option.lower()
+                    and option.lower() == correct_answer.lower()
+                ):
+                    is_correct = True
+                    break
+        
+        # If answer is correct, just return simple confirmation
+        if is_correct:
+            yield "data: Correct! Well done!\n\n"
+            return
+        
+        # For incorrect answers, generate personalized streaming feedback
+        try:
+            # Initialize OpenAI client
+            api_key = os.getenv("OPENAI_API_KEY")
+            if not api_key:
+                raise HTTPException(status_code=500, detail="OpenAI API key not configured")
+            
+            client = OpenAI(api_key=api_key)
+            
+            # Build prompt for personalized feedback
+            feedback_prompt = f"""
+            The user answered a quiz question incorrectly. Provide helpful, encouraging feedback.
+            
+            Question: {question.question}
+            User's Answer: {user_answer}
+            Correct Answer: {correct_answer}
+            
+            Provide a brief, encouraging explanation of:
+            1. Why their answer was incorrect
+            2. What the correct answer is and why it's correct
+            3. A helpful tip or insight to remember for the future
+            
+            Keep it concise (2-3 sentences max) and encouraging. Be supportive, not critical.
+            """
+            
+            # Stream the response from OpenAI
+            stream = client.chat.completions.create(
+                model="gpt-3.5-turbo",
+                messages=[
+                    {
+                        "role": "system", 
+                        "content": "You are a supportive tutor providing encouraging feedback on quiz answers. Be brief, clear, and motivating."
+                    },
+                    {"role": "user", "content": feedback_prompt}
+                ],
+                stream=True,
+                temperature=0.7,
+                max_tokens=150
+            )
+            
+            # Yield each chunk as Server-Sent Events format
+            for chunk in stream:
+                if chunk.choices[0].delta.content is not None:
+                    content = chunk.choices[0].delta.content
+                    yield f"data: {content}\n\n"
+            
+            # Signal end of stream
+            yield "data: [DONE]\n\n"
+            
+        except Exception as e:
+            # Fallback to basic feedback if streaming fails
+            yield f"data: The correct answer is: {correct_answer}. {str(e)}\n\n"
 
 
 # Dependency injection functions for FastAPI

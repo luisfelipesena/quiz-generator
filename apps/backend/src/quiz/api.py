@@ -3,6 +3,7 @@ Quiz API endpoints - Route handlers for quiz operations
 """
 
 from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
+from fastapi.responses import StreamingResponse
 from src.pdf.services import PdfProcessingService
 from src.quiz.dto import (
     AnswerRequest,
@@ -141,4 +142,49 @@ async def check_answer(
     except Exception as e:
         raise HTTPException(
             status_code=500, detail=f"Unexpected error checking answer: {str(e)}"
+        )
+
+
+@quiz_router.post("/check-answer-stream")
+async def check_answer_stream(
+    answer_request: AnswerRequest,
+    quiz_management_service: QuizManagementService = Depends(
+        get_quiz_management_service
+    ),
+):
+    """
+    Check answer and provide streaming feedback for incorrect answers
+    
+    Args:
+        answer_request: The answer to check
+        quiz_management_service: Injected quiz management service
+        
+    Returns:
+        StreamingResponse with personalized feedback
+        
+    Raises:
+        HTTPException: If question not found or streaming fails
+    """
+    try:
+        async def generate_feedback():
+            async for chunk in quiz_management_service.get_streaming_feedback(answer_request):
+                yield chunk
+        
+        return StreamingResponse(
+            generate_feedback(),
+            media_type="text/plain",
+            headers={
+                "Cache-Control": "no-cache",
+                "Connection": "keep-alive",
+                "Access-Control-Allow-Origin": "*",
+                "Access-Control-Allow-Headers": "*",
+            }
+        )
+        
+    except HTTPException:
+        # Re-raise HTTP exceptions as-is
+        raise
+    except Exception as e:
+        raise HTTPException(
+            status_code=500, detail=f"Unexpected error streaming feedback: {str(e)}"
         )

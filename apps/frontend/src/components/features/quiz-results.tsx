@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import Image from 'next/image'
 import { Check, X, Share, Download, Copy, RotateCcw, ChevronDown } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { DropdownMenu, DropdownMenuItem } from '@/components/ui/dropdown-menu'
@@ -74,14 +75,20 @@ export function QuizResults() {
       <div className="max-w-3xl mx-auto space-y-8">
         {/* Results Header */}
         <div className="text-center space-y-6">
-          <div className="inline-flex items-center justify-center w-24 h-24 bg-green-100 rounded-full">
-            <Check className="w-12 h-12 text-green-600" />
+          <div className="inline-flex items-center justify-center w-24 h-24">
+            <Image
+              src="/images/success-icon.png"
+              alt="Success"
+              width={96}
+              height={96}
+              className="object-contain"
+            />
           </div>
           <div className="space-y-2">
-            <h1 className="text-3xl font-semibold text-gray-900">
+            <h1 className="text-3xl font-semibold text-foreground">
               Great Work {getFirstName()}, you did very good on your quiz.
             </h1>
-            <div className="text-5xl font-bold text-gray-900 mt-4">
+            <div className="text-5xl font-bold text-foreground mt-4">
               {correct}/{total}
             </div>
             <div className="flex items-center justify-center gap-4 mt-4">

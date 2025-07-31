@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { Check, X, ArrowRight } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useQuizAnswer } from '@/hooks/useQuizMutations'
+import { useStreamingFeedback } from '@/hooks/useStreamingFeedback'
 import { useQuizStore } from '@/stores/quiz-store'
 
 export function Quiz() {
@@ -20,6 +21,7 @@ export function Quiz() {
 
   const currentQuestion = getCurrentQuestion()
   const { checkAnswer, isLoading, reset } = useQuizAnswer()
+  const { feedback: streamingFeedback, isStreaming, startStreaming, reset: resetStreaming } = useStreamingFeedback()
 
   const handleAnswerSelect = (answer: string) => {
     if (!showFeedback && !isLoading) {
@@ -30,8 +32,18 @@ export function Quiz() {
   const handleSubmitAnswer = async () => {
     if (currentQuestion && selectedAnswer && !hasAnswered) {
       try {
+        // First check the answer normally to show immediate feedback
         await checkAnswer(currentQuestion.id, selectedAnswer)
         setHasAnswered(true)
+        
+        // If answer is incorrect, start streaming feedback
+        const isCorrect = selectedAnswer === currentQuestion.answer
+        if (!isCorrect) {
+          startStreaming({
+            questionId: currentQuestion.id,
+            userAnswer: selectedAnswer,
+          })
+        }
       } catch (error) {
         console.error('Failed to check answer:', error)
       }
@@ -42,6 +54,7 @@ export function Quiz() {
     nextQuestion()
     setSelectedAnswer('')
     setHasAnswered(false)
+    resetStreaming()
     reset()
   }
 
@@ -56,7 +69,7 @@ export function Quiz() {
   const isCorrect = showFeedback && selectedAnswer === currentQuestion.answer
 
   return (
-    <div className="max-w-2xl mx-auto space-y-8">
+    <div className="max-w-4xl mx-auto space-y-8">
       <div className="flex items-center gap-3">
         <button
           onClick={() => useQuizStore.getState().setCurrentStep('edit')}
@@ -67,19 +80,19 @@ export function Quiz() {
           </svg>
         </button>
         <div className="flex items-center gap-3">
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <rect x="2" y="2" width="5" height="5" rx="1" fill="#8B5CF6"/>
-            <rect x="9" y="2" width="5" height="5" rx="1" fill="#E5E7EB"/>
-            <rect x="2" y="9" width="5" height="5" rx="1" fill="#E5E7EB"/>
-            <rect x="9" y="9" width="5" height="5" rx="1" fill="#E5E7EB"/>
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="2" y="2" width="6" height="6" rx="1" fill="currentColor" className="text-primary"/>
+            <rect x="12" y="2" width="6" height="6" rx="1" fill="currentColor" className="text-muted"/>
+            <rect x="2" y="12" width="6" height="6" rx="1" fill="currentColor" className="text-muted"/>
+            <rect x="12" y="12" width="6" height="6" rx="1" fill="currentColor" className="text-muted"/>
           </svg>
-          <h1 className="text-xl font-semibold text-gray-900">Mathematics Quiz</h1>
+          <h1 className="text-xl font-semibold text-foreground">Mathematics Quiz</h1>
         </div>
         <div className="ml-auto">
           <Button
             variant="outline"
             size="sm"
-            className="flex items-center gap-2"
+            className="flex items-center gap-2 border-primary text-primary hover:bg-primary hover:text-primary-foreground"
           >
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path d="M5 2V6M11 2V6M3 8H13M4 4H12C12.5523 4 13 4.44772 13 5V12C13 12.5523 12.5523 13 12 13H4C3.44772 13 3 12.5523 3 12V5C3 4.44772 3.44772 4 4 4Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
@@ -146,8 +159,8 @@ export function Quiz() {
           </div>
 
           {showFeedback && (
-            <div className={`p-4 rounded-lg text-center ${
-              isCorrect ? 'bg-green-50' : 'bg-white'
+            <div className={`p-4 rounded-lg ${
+              isCorrect ? 'bg-green-50 text-center' : 'bg-white border border-gray-200'
             }`}>
               {isCorrect ? (
                 <div className="space-y-2">
@@ -155,10 +168,29 @@ export function Quiz() {
                   <p className="text-lg font-medium text-green-700">Correct!</p>
                 </div>
               ) : (
-                <div className="text-left">
-                  <p className="text-sm text-gray-600">
-                    The correct answer is: <span className="font-medium text-gray-900">{currentQuestion.answer}</span>
-                  </p>
+                <div className="text-left space-y-3">
+                  {streamingFeedback ? (
+                    <div className="bg-blue-50 border border-blue-200 rounded-md p-3">
+                      <p className="text-sm text-blue-800 leading-relaxed">
+                        {streamingFeedback}
+                        {isStreaming && (
+                          <span className="inline-block w-2 h-4 bg-blue-600 ml-1 animate-pulse"></span>
+                        )}
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="bg-red-50 border border-red-200 rounded-md p-3">
+                      <p className="text-sm text-red-800">
+                        The correct answer is: <span className="font-medium">{currentQuestion.answer}</span>
+                      </p>
+                      {isStreaming && (
+                        <p className="text-xs text-red-600 mt-1 flex items-center">
+                          Getting personalized feedback...
+                          <span className="inline-block w-2 h-2 bg-red-600 rounded-full ml-2 animate-pulse"></span>
+                        </p>
+                      )}
+                    </div>
+                  )}
                 </div>
               )}
             </div>

@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useState } from 'react'
+import Image from 'next/image'
 import { AlertCircle, Loader2, CheckCircle2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { 
@@ -40,19 +41,13 @@ export function PdfUpload() {
       {/* Header Section */}
       <div className="text-center space-y-3">
         <div className="flex items-center justify-center gap-3">
-          <svg
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-            className="text-primary"
-          >
-            <path
-              d="M12 2L13.09 8.26L19 7L13.18 8.09L19 12L13.09 10.74L12 17L10.91 10.74L5 12L10.82 10.91L5 7L10.91 8.26L12 2Z"
-              fill="currentColor"
-            />
-          </svg>
+          <Image
+            src="/images/unstuck-icon.png"
+            alt="Unstuck icon"
+            width={32}
+            height={32}
+            className="object-contain"
+          />
           <h1 className="text-3xl font-semibold text-foreground">
             Unstuck Quiz Generator
           </h1>
@@ -75,19 +70,14 @@ export function PdfUpload() {
         >
           <FileUploadDropzone className="border-2 border-dashed border-gray-300 rounded-xl p-16 text-center cursor-pointer transition-all duration-200 hover:border-primary/60 hover:bg-gray-50/50 bg-white">
             {/* PDF Icon */}
-            <div className="flex justify-center mb-4">
-              <div className="relative">
-                <svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <rect x="12" y="8" width="40" height="48" rx="4" fill="#F3F4F6" stroke="#D1D5DB" strokeWidth="2"/>
-                  <rect x="16" y="12" width="32" height="4" rx="2" fill="#9CA3AF"/>
-                  <rect x="16" y="20" width="32" height="2" rx="1" fill="#D1D5DB"/>
-                  <rect x="16" y="24" width="24" height="2" rx="1" fill="#D1D5DB"/>
-                  <rect x="16" y="28" width="28" height="2" rx="1" fill="#D1D5DB"/>
-                  <rect x="16" y="32" width="20" height="2" rx="1" fill="#D1D5DB"/>
-                  <rect x="34" y="42" width="10" height="8" rx="2" fill="#DC2626"/>
-                  <text x="39" y="48" fill="white" fontSize="6" fontWeight="bold" textAnchor="middle">PDF</text>
-                </svg>
-              </div>
+            <div className="flex justify-center mb-6">
+              <Image
+                src="/images/pdf-icon.png"
+                alt="PDF icon"
+                width={64}
+                height={64}
+                className="object-contain"
+              />
             </div>
 
             {/* Upload Content */}
