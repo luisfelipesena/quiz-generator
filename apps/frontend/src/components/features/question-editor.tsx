@@ -86,10 +86,13 @@ export function QuestionEditor({ question, index }: QuestionEditorProps) {
                       <Input
                         value={option}
                         onChange={(e) => updateOption(optionIndex, e.target.value)}
-                        className="flex-1 h-10 border-gray-300 rounded-lg"
+                        className={`flex-1 h-10 rounded-lg ${isCorrectAnswer(option) ? 'border-green-500 bg-green-50' : 'border-gray-300'}`}
                       />
                       {isCorrectAnswer(option) && (
-                        <Check className="w-5 h-5 text-green-600 flex-shrink-0" />
+                        <div className="flex items-center gap-1 text-green-600">
+                          <Check className="w-5 h-5" />
+                          <span className="text-xs font-medium">Correct Answer</span>
+                        </div>
                       )}
                     </div>
                   ) : (
@@ -195,7 +198,7 @@ export function QuestionEditList() {
         </div>
       </div>
 
-      <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-2">
+      <div className="space-y-4 max-h-[70vh] overflow-y-auto pr-2">
         {questions.map((question, index) => (
           <QuestionEditor key={question.id} question={question} index={index} />
         ))}

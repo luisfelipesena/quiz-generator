@@ -360,12 +360,22 @@ class QuizManagementService:
             yield f"data: The correct answer is: {correct_answer}. {str(e)}\n\n"
 
 
+# Global singleton instances
+_quiz_generation_service: Optional[QuizGenerationService] = None
+_quiz_management_service: Optional[QuizManagementService] = None
+
 # Dependency injection functions for FastAPI
 def get_quiz_generation_service() -> QuizGenerationService:
     """Dependency for QuizGenerationService"""
-    return QuizGenerationService()
+    global _quiz_generation_service
+    if _quiz_generation_service is None:
+        _quiz_generation_service = QuizGenerationService()
+    return _quiz_generation_service
 
 
 def get_quiz_management_service() -> QuizManagementService:
-    """Dependency for QuizManagementService"""
-    return QuizManagementService()
+    """Dependency for QuizManagementService - Singleton to preserve state"""
+    global _quiz_management_service
+    if _quiz_management_service is None:
+        _quiz_management_service = QuizManagementService()
+    return _quiz_management_service

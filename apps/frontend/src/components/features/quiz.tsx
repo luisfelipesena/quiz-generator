@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button'
 import { useQuizAnswer } from '@/hooks/useQuizMutations'
 import { useStreamingFeedback } from '@/hooks/useStreamingFeedback'
 import { useQuizStore } from '@/stores/quiz-store'
-import { BackArrowIcon, StarIcon } from '@/components/icons'
+import { BackArrowIcon } from '@/components/icons'
 
 export function Quiz() {
   const [selectedAnswer, setSelectedAnswer] = useState<string>('')
@@ -86,14 +86,6 @@ export function Quiz() {
             <h1 className="text-xl font-semibold text-foreground">Mathematics Quiz</h1>
           </div>
         </div>
-        <Button
-          variant="outline"
-          size="sm"
-          className="flex items-center gap-2 bg-black text-white hover:bg-gray-800 border-black"
-        >
-          <StarIcon width={16} height={16} />
-          Upgrade
-        </Button>
       </div>
 
       <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-8">

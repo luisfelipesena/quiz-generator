@@ -26,7 +26,7 @@ export default function Home() {
           <LoadingTransition 
             title="Generating Quiz Questions"
             subtitle="Reading your materials..."
-            showNextButton={true}
+            showNextButton={false}
             nextStep="edit"
             nextLabel="Continue"
           />
@@ -44,7 +44,7 @@ export default function Home() {
           <LoadingTransition 
             title="Preparing Quiz for Practice"
             subtitle="Preparing the quiz so you can now practice..."
-            showNextButton={true}
+            showNextButton={false}
             nextStep="quiz"
             nextLabel="Start Quiz"
           />
