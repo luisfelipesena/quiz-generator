@@ -16,8 +16,8 @@ export default function Home() {
   const hasExistingQuiz = questions.length > 0
 
   return (
-    <div className="w-full min-h-screen">
-      <div className="relative min-h-screen flex items-center justify-center pt-16">
+    <div className="w-full min-h-screen overflow-x-hidden">
+      <div className="relative min-h-screen flex items-center justify-center pt-16 px-4 sm:px-6 lg:px-8">
         {/* Step transitions with animation */}
         <div className={`transition-all duration-500 ease-in-out w-full ${
           currentStep === 'upload' ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-[-100%] absolute inset-0 pointer-events-none'
@@ -76,7 +76,7 @@ export default function Home() {
       </div>
       
       {/* Progress indicator */}
-      <div className="fixed bottom-6 left-1/2 transform -translate-x-1/2 z-50">
+      <div className="fixed bottom-6 left-1/2 transform -translate-x-1/2 z-40">
         <div className="bg-card/80 backdrop-blur-sm border rounded-full px-4 py-2 shadow-lg">
           <div className="flex space-x-2">
             <div className={`w-2 h-2 rounded-full transition-all duration-300 ${

@@ -180,7 +180,7 @@ export function QuestionEditList() {
   }
 
   return (
-    <div className="max-w-3xl mx-auto space-y-8">
+    <div className="max-w-3xl mx-auto space-y-8 px-4 sm:px-0">
       <div className="space-y-4">
         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-6">
           <button
@@ -204,7 +204,7 @@ export function QuestionEditList() {
         </div>
       </div>
 
-      <div className="space-y-4 pb-20">
+      <div className="space-y-4 pb-32">
         {questions.map((question, index) => (
           <QuestionEditor key={question.id} question={question} index={index} />
         ))}

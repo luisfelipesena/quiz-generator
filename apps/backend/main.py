@@ -32,6 +32,7 @@ app = FastAPI(
 allowed_origins = [
     "http://localhost:3000",  # Local development
     "http://127.0.0.1:3000",  # Alternative local development
+    "https://quiz-generator-frontend-psi.vercel.app",  # Production frontend
 ]
 
 # Add production origins from environment variable
@@ -54,6 +55,7 @@ app.add_middleware(
         "Authorization",
         "X-Session-ID",
         "x-session-id",
+        "Quiz-Title",
     ],
     expose_headers=["*"],
 )
