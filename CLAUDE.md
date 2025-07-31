@@ -33,6 +33,13 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **Backend Python venv**: `python3 -m venv apps/backend/venv && source apps/backend/venv/bin/activate && pip install -r apps/backend/requirements.txt`
 - **Check dependencies**: `bun run check:deps`
 
+### Testing Commands
+- **E2E Tests (Complete)**: `python3 test_e2e_complete.py` (Selenium-based, comprehensive)
+- **E2E Tests (Playwright)**: `bun run test:e2e` (Modern browser automation)
+- **API Tests Only**: `python3 test_quiz_complete.py` (Backend validation)
+- **Visual Tests**: `./visual_test_script.sh` (Screenshots across viewports)
+- **Test Report**: `bun run test:e2e:report` (View Playwright HTML report)
+
 ## Project Architecture
 
 ### High-Level Architecture

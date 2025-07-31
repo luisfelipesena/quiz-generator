@@ -20,6 +20,10 @@
     "test": "bun run test:setup && bun run test:build",
     "test:setup": "bun run check:env && bun run check:venv && bun run check:deps",
     "test:build": "bun run build:frontend",
+    "test:e2e": "NODE_OPTIONS=\"\" bunx playwright test",
+    "test:e2e:ui": "NODE_OPTIONS=\"\" bunx playwright test --ui",
+    "test:e2e:debug": "NODE_OPTIONS=\"\" bunx playwright test --debug",
+    "test:e2e:report": "NODE_OPTIONS=\"\" bunx playwright show-report",
     "check:env": "test -f .env || (echo '❌ .env file not found' && exit 1)",
     "check:venv": "test -d apps/backend/venv || (echo '❌ Python venv not found. Run: python3 -m venv apps/backend/venv && source apps/backend/venv/bin/activate && pip install -r apps/backend/requirements.txt' && exit 1)",
     "check:deps": "cd apps/backend && source venv/bin/activate && python -c 'import fastapi, openai, PyPDF2' || (echo '❌ Backend dependencies missing. Run: pip install -r apps/backend/requirements.txt' && exit 1)",
@@ -40,6 +44,7 @@
     "preview": "bun run build && bun run start"
   },
   "devDependencies": {
+    "@playwright/test": "^1.54.1",
     "@types/node": "^20.0.0"
   }
 }

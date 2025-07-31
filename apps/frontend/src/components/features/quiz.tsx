@@ -94,7 +94,7 @@ export function Quiz() {
 
   return (
     <div className="max-w-3xl mx-auto space-y-8">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between sticky top-0 bg-white/80 backdrop-blur-sm z-10 py-4">
         <div className="flex items-center gap-3">
           <button
             onClick={() => useQuizStore.getState().setCurrentStep('edit')}
@@ -106,12 +106,12 @@ export function Quiz() {
             <div className="w-6 h-6 bg-red-500 rounded flex items-center justify-center">
               <PdfIcon width={16} height={16} className="text-white" />
             </div>
-            <h1 className="text-xl font-semibold text-foreground">{quizTitle}</h1>
+            <h1 className="text-xl font-semibold text-foreground truncate max-w-[200px] sm:max-w-none">{quizTitle}</h1>
           </div>
         </div>
       </div>
 
-      <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-8 max-h-[80vh] overflow-y-auto">
+      <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-4 sm:p-8 max-h-[calc(100vh-12rem)] overflow-y-auto">
         <div className="space-y-6">
           <div className="space-y-2">
             <p className="text-sm text-gray-500">Question {currentQuestionIndex + 1}</p>

@@ -79,9 +79,9 @@ export function QuizResults() {
         onSuccess={handleNameModalSuccess}
       />
 
-      <div className={`max-w-3xl mx-auto space-y-8 ${showNameModal ? 'blur-sm' : ''} max-h-[90vh] overflow-y-auto`}>
+      <div className={`max-w-3xl mx-auto space-y-8 ${showNameModal ? 'blur-sm' : ''} max-h-[calc(100vh-8rem)] overflow-y-auto px-4 sm:px-0`}>
         {/* Results Header */}
-        <div className="text-center space-y-6">
+        <div className="text-center space-y-6 sticky top-0 bg-white/80 backdrop-blur-sm z-10 py-4">
           <div className="inline-flex items-center justify-center w-24 h-24">
             <SuccessIcon 
               width={96} 
@@ -120,12 +120,12 @@ export function QuizResults() {
         </div>
 
         {/* Action Buttons */}
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sticky bottom-0 bg-white/80 backdrop-blur-sm py-4">
           <DropdownMenu
             trigger={
               <Button 
                 size="lg"
-                className="px-8 py-3 text-base font-medium rounded-lg flex items-center gap-2"
+                className="px-8 py-3 text-base font-medium rounded-lg flex items-center gap-2 w-full sm:w-auto"
               >
                 <Share className="w-4 h-4" />
                 Share results

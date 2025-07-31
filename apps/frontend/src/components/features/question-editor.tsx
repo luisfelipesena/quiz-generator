@@ -182,7 +182,7 @@ export function QuestionEditList() {
   return (
     <div className="max-w-3xl mx-auto space-y-8">
       <div className="space-y-4">
-        <div className="flex items-center gap-3">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-6">
           <button
             onClick={handleBack}
             className="flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors"
@@ -190,27 +190,27 @@ export function QuestionEditList() {
             <BackArrowIcon width={20} height={20} />
             <span className="text-sm font-medium">Back</span>
           </button>
-        </div>
 
-        <div className="flex items-center gap-3">
-          <UnstuckIcon 
-            width={24} 
-            height={24} 
-            className="text-primary" 
-          />
-          <h1 className="text-2xl font-semibold text-gray-900">
-            Review & Edit Questions
-          </h1>
+          <div className="flex items-center gap-3">
+            <UnstuckIcon 
+              width={24} 
+              height={24} 
+              className="text-primary" 
+            />
+            <h1 className="text-2xl font-semibold text-gray-900">
+              Review & Edit Questions
+            </h1>
+          </div>
         </div>
       </div>
 
-      <div className="space-y-4 max-h-[70vh] overflow-y-auto pr-2">
+      <div className="space-y-4 max-h-[calc(100vh-16rem)] overflow-y-auto pr-2">
         {questions.map((question, index) => (
           <QuestionEditor key={question.id} question={question} index={index} />
         ))}
       </div>
 
-      <div className="flex justify-center pt-4">
+      <div className="flex justify-center pt-4 sticky bottom-0 bg-white/80 backdrop-blur-sm py-4">
         <Button 
           onClick={handleStartQuiz} 
           size="lg" 
