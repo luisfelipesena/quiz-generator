@@ -29,10 +29,12 @@ quiz_router = APIRouter(prefix="/quiz", tags=["Quiz"])
 async def sync_options():
     """Handle preflight requests for sync endpoint"""
     return Response(
+        status_code=200,
         headers={
-            "Access-Control-Allow-Origin": "*",
+            "Access-Control-Allow-Origin": "https://quiz-generator-frontend-psi.vercel.app",
             "Access-Control-Allow-Methods": "POST, OPTIONS",
             "Access-Control-Allow-Headers": "Content-Type, X-Session-ID, x-session-id, Quiz-Title",
+            "Access-Control-Allow-Credentials": "true",
         }
     )
 
@@ -41,10 +43,12 @@ async def sync_options():
 async def upload_pdf_options():
     """Handle preflight requests for upload-pdf endpoint"""
     return Response(
+        status_code=200,
         headers={
-            "Access-Control-Allow-Origin": "*",
+            "Access-Control-Allow-Origin": "https://quiz-generator-frontend-psi.vercel.app",
             "Access-Control-Allow-Methods": "POST, OPTIONS",
             "Access-Control-Allow-Headers": "Content-Type, X-Session-ID, x-session-id",
+            "Access-Control-Allow-Credentials": "true",
         }
     )
 
