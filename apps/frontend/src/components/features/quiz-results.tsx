@@ -79,24 +79,24 @@ export function QuizResults() {
         onSuccess={handleNameModalSuccess}
       />
 
-      <div className={`max-w-3xl mx-auto space-y-8 ${showNameModal ? 'blur-sm' : ''} max-h-[calc(100vh-8rem)] overflow-y-auto px-4 sm:px-0`}>
+      <div className={`max-w-3xl mx-auto ${showNameModal ? 'blur-sm' : ''} px-4 sm:px-0 pb-32`}>
         {/* Results Header */}
-        <div className="text-center space-y-6 sticky top-0 bg-white/80 backdrop-blur-sm z-10 py-4">
-          <div className="inline-flex items-center justify-center w-24 h-24">
+        <div className="text-center space-y-6 py-8">
+          <div className="inline-flex items-center justify-center w-20 h-20 sm:w-24 sm:h-24">
             <SuccessIcon 
-              width={96} 
-              height={96} 
-              className="text-green-600" 
+              width={80} 
+              height={80} 
+              className="text-green-600 sm:w-24 sm:h-24" 
             />
           </div>
           <div className="space-y-2">
-            <h1 className="text-3xl font-semibold text-foreground">
+            <h1 className="text-xl sm:text-3xl font-semibold text-foreground px-4">
               Great Work {getFirstName()}, you did very good on your quiz.
             </h1>
-            <div className="text-5xl font-bold text-foreground mt-4">
+            <div className="text-4xl sm:text-5xl font-bold text-foreground mt-4">
               {correct}/{total}
             </div>
-            <div className="flex items-center justify-center gap-4 mt-4">
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-4 mt-4">
               <div className="flex items-center gap-2">
                 <div className="w-3 h-3 bg-green-500 rounded-full" />
                 <span className="text-sm text-gray-600">Answered Correctly</span>
@@ -118,55 +118,10 @@ export function QuizResults() {
             </div>
           </div>
         </div>
-
-        {/* Action Buttons */}
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sticky bottom-0 bg-white/80 backdrop-blur-sm py-4">
-          <DropdownMenu
-            trigger={
-              <Button 
-                size="lg"
-                className="px-8 py-3 text-base font-medium rounded-lg flex items-center gap-2 w-full sm:w-auto"
-              >
-                <Share className="w-4 h-4" />
-                Share results
-                <ChevronDown className="w-4 h-4" />
-              </Button>
-            }
-          >
-            <DropdownMenuItem 
-              onClick={() => handleShare('native')}
-              icon={<Share className="w-4 h-4" />}
-            >
-              Share via system
-            </DropdownMenuItem>
-            <DropdownMenuItem 
-              onClick={() => handleShare('copy')}
-              icon={<Copy className="w-4 h-4" />}
-            >
-              Copy to clipboard
-            </DropdownMenuItem>
-            <DropdownMenuItem 
-              onClick={() => handleShare('download')}
-              icon={<Download className="w-4 h-4" />}
-            >
-              Download as file
-            </DropdownMenuItem>
-          </DropdownMenu>
-          
-          <Button 
-            onClick={handleTakeAnotherQuiz}
-            variant="outline"
-            size="lg"
-            className="px-6 py-3 text-base font-medium rounded-lg flex items-center gap-2"
-          >
-            <RotateCcw className="w-4 h-4" />
-            Take Another Quiz
-          </Button>
-        </div>
         
         {/* Share Success Message */}
         {shareMessage && (
-          <div className="text-center">
+          <div className="text-center mb-6">
             <div className="inline-flex items-center gap-2 px-4 py-2 bg-green-50 text-green-700 rounded-lg border border-green-200 animate-in fade-in slide-in-from-bottom-2 duration-300">
               <Check className="w-4 h-4" />
               <span className="text-sm font-medium">{shareMessage}</span>
@@ -175,7 +130,7 @@ export function QuizResults() {
         )}
 
         {/* Result Summary */}
-        <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
+        <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-4 sm:p-6 mb-6">
           <h2 className="text-lg font-semibold text-gray-900 mb-4">Result Summary</h2>
           <div className="space-y-3">
             {questions.map((question, index) => {
@@ -213,6 +168,51 @@ export function QuizResults() {
               )
             })}
           </div>
+        </div>
+
+        {/* Fixed Action Buttons */}
+        <div className="fixed bottom-0 left-0 right-0 flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 p-4 bg-white border-t border-gray-200 shadow-lg z-50">
+          <DropdownMenu
+            trigger={
+              <Button 
+                size="lg"
+                className="px-6 py-3 text-base font-medium rounded-lg flex items-center gap-2 w-full sm:w-auto"
+              >
+                <Share className="w-4 h-4" />
+                Share results
+                <ChevronDown className="w-4 h-4" />
+              </Button>
+            }
+          >
+            <DropdownMenuItem 
+              onClick={() => handleShare('native')}
+              icon={<Share className="w-4 h-4" />}
+            >
+              Share via system
+            </DropdownMenuItem>
+            <DropdownMenuItem 
+              onClick={() => handleShare('copy')}
+              icon={<Copy className="w-4 h-4" />}
+            >
+              Copy to clipboard
+            </DropdownMenuItem>
+            <DropdownMenuItem 
+              onClick={() => handleShare('download')}
+              icon={<Download className="w-4 h-4" />}
+            >
+              Download as file
+            </DropdownMenuItem>
+          </DropdownMenu>
+          
+          <Button 
+            onClick={handleTakeAnotherQuiz}
+            variant="outline"
+            size="lg"
+            className="px-6 py-3 text-base font-medium rounded-lg flex items-center gap-2 w-full sm:w-auto"
+          >
+            <RotateCcw className="w-4 h-4" />
+            Take Another Quiz
+          </Button>
         </div>
       </div>
     </>

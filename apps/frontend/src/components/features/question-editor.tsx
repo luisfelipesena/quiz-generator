@@ -204,17 +204,17 @@ export function QuestionEditList() {
         </div>
       </div>
 
-      <div className="space-y-4 max-h-[calc(100vh-16rem)] overflow-y-auto pr-2">
+      <div className="space-y-4 pb-20">
         {questions.map((question, index) => (
           <QuestionEditor key={question.id} question={question} index={index} />
         ))}
       </div>
 
-      <div className="flex justify-center pt-4 sticky bottom-0 bg-white/80 backdrop-blur-sm py-4">
+      <div className="fixed bottom-0 left-0 right-0 flex justify-center p-4 bg-white border-t border-gray-200 shadow-lg z-50">
         <Button 
           onClick={handleStartQuiz} 
           size="lg" 
-          className="px-8 py-3 text-base font-medium rounded-lg"
+          className="px-8 py-3 text-base font-medium rounded-lg w-full max-w-xs"
         >
           Start Quiz
         </Button>
