@@ -134,7 +134,7 @@ test.describe('Final Validation', () => {
     await expect(page.locator('input[type="file"]')).toBeVisible();
     
     console.log('\n🎉 FINAL VALIDATION COMPLETE');
-    console.log('=' * 50);
+    console.log('='.repeat(50));
     console.log('✅ Application loads successfully');
     console.log('✅ UI components render correctly');
     console.log('✅ File upload interface present');
@@ -142,6 +142,6 @@ test.describe('Final Validation', () => {
     console.log('✅ Backend API accessible');
     console.log('');
     console.log('🚀 READY FOR PRODUCTION DEPLOYMENT!');
-    console.log('=' * 50);
+    console.log('='.repeat(50));
   });
 });
