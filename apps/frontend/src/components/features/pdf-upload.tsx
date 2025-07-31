@@ -72,7 +72,7 @@ export function PdfUpload() {
             {/* PDF Icon */}
             <div className="flex justify-center mb-6">
               <Image
-                src="/images/pdf-icon.png"
+                src="/images/pdfs-icon.png"
                 alt="PDF icon"
                 width={64}
                 height={64}
