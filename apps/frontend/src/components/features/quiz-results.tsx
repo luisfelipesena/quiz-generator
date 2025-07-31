@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { Check, X, Share, Download, Copy, RotateCcw, ChevronDown } from 'lucide-react'
+import { ChevronDownIcon } from '@/components/icons'
 import { Button } from '@/components/ui/button'
 import { SuccessIcon } from '@/components/icons'
 import { DropdownMenu, DropdownMenuItem } from '@/components/ui/dropdown-menu'
@@ -192,9 +193,7 @@ export function QuizResults() {
                         </div>
                       )}
                     </div>
-                    <svg className="w-4 h-4 text-gray-400 group-open:rotate-180 transition-transform" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M4 6L8 10L12 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                    </svg>
+                    <ChevronDownIcon className="w-4 h-4 text-gray-400 group-open:rotate-180 transition-transform" />
                   </summary>
                   <div className="mt-3 px-3 pb-3 space-y-3">
                     <p className="text-sm text-gray-700">{question.question}</p>

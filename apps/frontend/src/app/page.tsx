@@ -11,16 +11,16 @@ export default function Home() {
   const { currentStep } = useQuizStore()
 
   return (
-    <div className="container mx-auto min-h-screen overflow-y-auto">
-      <div className="relative">
+    <div className="w-full">
+      <div className="relative min-h-[80vh] flex items-center justify-center">
         {/* Step transitions with animation */}
-        <div className={`transition-all duration-500 ease-in-out ${
+        <div className={`transition-all duration-500 ease-in-out w-full ${
           currentStep === 'upload' ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-[-100%] absolute inset-0 pointer-events-none'
         }`}>
           <PdfUpload />
         </div>
         
-        <div className={`transition-all duration-500 ease-in-out ${
+        <div className={`transition-all duration-500 ease-in-out w-full ${
           currentStep === 'generating' ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-[-100%] absolute inset-0 pointer-events-none'
         }`}>
           <LoadingTransition 
@@ -32,13 +32,13 @@ export default function Home() {
           />
         </div>
         
-        <div className={`transition-all duration-500 ease-in-out ${
-          currentStep === 'edit' ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-[-100%] absolute inset-0 pointer-events-none'
+        <div className={`transition-all duration-500 ease-in-out w-full ${
+          currentStep === 'edit' ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-[-100%] absolute inset-0 pointer-events-none flex items-center justify-center'
         }`}>
           <QuestionEditList />
         </div>
         
-        <div className={`transition-all duration-500 ease-in-out ${
+        <div className={`transition-all duration-500 ease-in-out w-full ${
           currentStep === 'preparing' ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-[-100%] absolute inset-0 pointer-events-none'
         }`}>
           <LoadingTransition 
@@ -50,14 +50,14 @@ export default function Home() {
           />
         </div>
         
-        <div className={`transition-all duration-500 ease-in-out ${
-          currentStep === 'quiz' ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-[-100%] absolute inset-0 pointer-events-none'
+        <div className={`transition-all duration-500 ease-in-out w-full ${
+          currentStep === 'quiz' ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-[-100%] absolute inset-0 pointer-events-none flex items-center justify-center'
         }`}>
           <Quiz />
         </div>
         
-        <div className={`transition-all duration-500 ease-in-out ${
-          currentStep === 'results' ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-[-100%] absolute inset-0 pointer-events-none'
+        <div className={`transition-all duration-500 ease-in-out w-full ${
+          currentStep === 'results' ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-[-100%] absolute inset-0 pointer-events-none flex items-center justify-center'
         }`}>
           <QuizResults />
         </div>

@@ -26,9 +26,9 @@ export function LoadingTransition({ title, subtitle, showNextButton = false, nex
         {/* Animated transition icon */}
         <div className="flex justify-center">
           <TransitionIcon 
-            width={120} 
-            height={120} 
-            className="text-primary animate-pulse" 
+            width={200} 
+            height={90} 
+            className="text-primary" 
           />
         </div>
         

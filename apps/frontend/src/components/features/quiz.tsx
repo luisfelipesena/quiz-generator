@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import { useQuizAnswer } from '@/hooks/useQuizMutations'
 import { useStreamingFeedback } from '@/hooks/useStreamingFeedback'
 import { useQuizStore } from '@/stores/quiz-store'
+import { BackArrowIcon, StarIcon } from '@/components/icons'
 
 export function Quiz() {
   const [selectedAnswer, setSelectedAnswer] = useState<string>('')
@@ -76,9 +77,7 @@ export function Quiz() {
             onClick={() => useQuizStore.getState().setCurrentStep('edit')}
             className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
           >
-            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M12.5 15L7.5 10L12.5 5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
+            <BackArrowIcon width={20} height={20} />
           </button>
           <div className="flex items-center gap-2">
             <div className="w-6 h-6 bg-red-500 rounded flex items-center justify-center">
@@ -92,9 +91,7 @@ export function Quiz() {
           size="sm"
           className="flex items-center gap-2 bg-black text-white hover:bg-gray-800 border-black"
         >
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M8 0L9.18 3.04L12.66 3.04L9.82 5.29L10.99 8.33L8 6.08L5.01 8.33L6.18 5.29L3.34 3.04L6.82 3.04L8 0Z" fill="currentColor"/>
-          </svg>
+          <StarIcon width={16} height={16} />
           Upgrade
         </Button>
       </div>

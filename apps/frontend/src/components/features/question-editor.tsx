@@ -8,6 +8,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
 import { type QuestionAnswer, type QuestionUpdateRequest } from '@/lib/api'
 import { useQuizStore } from '@/stores/quiz-store'
+import { UnstuckIcon, BackArrowIcon } from '@/components/icons'
 
 interface QuestionEditorProps {
   question: QuestionAnswer
@@ -177,27 +178,17 @@ export function QuestionEditList() {
         onClick={handleBack}
         className="flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors"
       >
-        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M12.5 15L7.5 10L12.5 5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-        </svg>
+        <BackArrowIcon width={20} height={20} />
         <span className="text-sm font-medium">Back</span>
       </button>
 
       <div className="space-y-4">
         <div className="flex items-center gap-3">
-          <svg
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-            className="text-primary"
-          >
-            <path
-              d="M12 2L13.09 8.26L19 7L13.18 8.09L19 12L13.09 10.74L12 17L10.91 10.74L5 12L10.82 10.91L5 7L10.91 8.26L12 2Z"
-              fill="currentColor"
-            />
-          </svg>
+          <UnstuckIcon 
+            width={24} 
+            height={24} 
+            className="text-primary" 
+          />
           <h1 className="text-2xl font-semibold text-gray-900">
             Review & Edit Questions
           </h1>
