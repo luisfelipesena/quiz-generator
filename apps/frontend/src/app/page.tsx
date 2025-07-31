@@ -11,7 +11,7 @@ export default function Home() {
   const { currentStep } = useQuizStore()
 
   return (
-    <div className="container mx-auto min-h-screen">
+    <div className="container mx-auto min-h-screen overflow-y-auto">
       <div className="relative">
         {/* Step transitions with animation */}
         <div className={`transition-all duration-500 ease-in-out ${
@@ -26,6 +26,9 @@ export default function Home() {
           <LoadingTransition 
             title="Generating Quiz Questions"
             subtitle="Reading your materials..."
+            showNextButton={true}
+            nextStep="edit"
+            nextLabel="Continue"
           />
         </div>
         
@@ -41,6 +44,9 @@ export default function Home() {
           <LoadingTransition 
             title="Preparing Quiz for Practice"
             subtitle="Preparing the quiz so you can now practice..."
+            showNextButton={true}
+            nextStep="quiz"
+            nextLabel="Start Quiz"
           />
         </div>
         

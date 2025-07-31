@@ -28,19 +28,10 @@ class QuizGenerationService:
         if self._client is None:
             api_key = os.getenv("OPENAI_API_KEY")
             if not api_key:
-                print("=== API Key Error ===")
-                print("OPENAI_API_KEY environment variable not found")
-                print("=====================")
                 raise HTTPException(
-                    status_code=500, detail="OpenAI API key not configured"
+                    status_code=500, 
+                    detail="OpenAI API key not configured. Please check your environment variables."
                 )
-
-            # Log API key info (first/last chars only for security)
-            print("=== API Key Debug ===")
-            print(f"Key length: {len(api_key)} characters")
-            print(f"Key starts with: {api_key[:7]}...")
-            print(f"Key ends with: ...{api_key[-4:]}")
-            print("====================")
 
             self._client = OpenAI(api_key=api_key)
         return self._client
@@ -80,52 +71,34 @@ class QuizGenerationService:
 
             # Check if response and content exist
             if not response.choices or not response.choices[0].message.content:
-                print("=== OpenAI Empty Response Debug ===")
-                print(f"Response: {response}")
-                print(f"Choices: {response.choices if response else 'No response'}")
-                print("===================================")
                 raise HTTPException(
-                    status_code=500, detail="Empty response from OpenAI API"
+                    status_code=500, detail="OpenAI returned empty response. Please try again."
                 )
 
             content = response.choices[0].message.content.strip()
             if not content:
-                print("=== OpenAI Empty Content Debug ===")
-                print(f"Raw content: '{response.choices[0].message.content}'")
-                print("==================================")
                 raise HTTPException(
-                    status_code=500, detail="Empty content from OpenAI API"
+                    status_code=500, detail="OpenAI returned empty content. Please try again."
                 )
-
-            # Log successful response for debugging
-            print("=== OpenAI Response Debug ===")
-            print(f"Content length: {len(content)} characters")
-            print(f"First 200 chars: {content[:200]}...")
-            print("=============================")
 
             # Try to parse JSON response
             try:
                 questions_data = json.loads(content)
-            except json.JSONDecodeError as e:
-                # Log the problematic content for debugging
-                print("=== JSON Parse Error Debug ===")
-                print(f"Error: {str(e)}")
-                print(f"Content: {content}")
-                print("==============================")
+            except json.JSONDecodeError:
                 raise HTTPException(
                     status_code=500,
-                    detail=f"Invalid JSON response from OpenAI: {str(e)}",
+                    detail="OpenAI returned invalid response format. Please try again.",
                 )
 
             # Validate response format
             if not isinstance(questions_data, list):
                 raise HTTPException(
-                    status_code=500, detail="OpenAI response is not a JSON array"
+                    status_code=500, detail="Invalid response format from AI. Please try again."
                 )
 
             if len(questions_data) == 0:
                 raise HTTPException(
-                    status_code=500, detail="OpenAI returned empty questions array"
+                    status_code=500, detail="AI did not generate any questions. Please try again."
                 )
 
             questions = []
@@ -146,34 +119,35 @@ class QuizGenerationService:
                             options=q.get("options", []),
                         )
                     )
-                except (KeyError, ValueError) as e:
+                except (KeyError, ValueError):
                     raise HTTPException(
-                        status_code=500, detail=f"Invalid question format: {str(e)}"
+                        status_code=500, detail="AI generated malformed questions. Please try again."
                     )
 
             if len(questions) == 0:
                 raise HTTPException(
-                    status_code=500, detail="No valid questions generated"
+                    status_code=500, detail="Failed to generate valid questions. Please try again."
                 )
 
             return questions
 
-        except json.JSONDecodeError as e:
+        except json.JSONDecodeError:
             raise HTTPException(
-                status_code=500, detail=f"Failed to parse OpenAI response: {str(e)}"
+                status_code=500, detail="Failed to process AI response. Please try again."
             )
         except Exception as e:
-            # Log detailed error information for debugging
-            print("=== OpenAI Error Debug Info ===")
-            print(f"Error type: {type(e).__name__}")
-            print(f"Error message: {str(e)}")
-            print(f"Prompt used: {prompt[:500]}...")
-            print(f"Text length: {len(text)} characters")
-            print("===============================")
-
-            raise HTTPException(
-                status_code=500, detail=f"Error generating questions: {str(e)}"
-            )
+            # Provide user-friendly error messages based on error type
+            error_msg = str(e).lower()
+            if "authentication" in error_msg or "api_key" in error_msg:
+                detail = "AI service authentication failed. Please contact support."
+            elif "rate_limit" in error_msg:
+                detail = "AI service is currently busy. Please try again in a moment."
+            elif "timeout" in error_msg:
+                detail = "AI service took too long to respond. Please try again."
+            else:
+                detail = "Failed to generate questions. Please try again."
+            
+            raise HTTPException(status_code=500, detail=detail)
 
     def _build_generation_prompt(self, text: str, num_questions: int) -> str:
         """Build the prompt for OpenAI question generation"""

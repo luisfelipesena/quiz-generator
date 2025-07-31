@@ -3,7 +3,7 @@
 import React, { useState } from 'react'
 import { AlertCircle, Loader2, CheckCircle2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { UnstuckIcon, PdfIcon } from '@/components/icons'
+import { UnstuckIcon, DropPdfIcon } from '@/components/icons'
 import { 
   FileUpload, 
   FileUploadDropzone, 
@@ -69,10 +69,9 @@ export function PdfUpload() {
           <FileUploadDropzone className="border-2 border-dashed border-gray-300 rounded-xl p-16 text-center cursor-pointer transition-all duration-200 hover:border-primary/60 hover:bg-gray-50/50 bg-white">
             {/* PDF Icon */}
             <div className="flex justify-center mb-6">
-              <PdfIcon 
+              <DropPdfIcon 
                 width={64} 
                 height={64} 
-                className="text-muted-foreground" 
               />
             </div>
 

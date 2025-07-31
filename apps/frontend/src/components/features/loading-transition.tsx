@@ -1,13 +1,25 @@
 'use client'
 
 import { TransitionIcon } from '@/components/icons'
+import { Button } from '@/components/ui/button'
+import { useQuizStore, type QuizStep } from '@/stores/quiz-store'
 
 interface LoadingTransitionProps {
   title: string
   subtitle: string
+  showNextButton?: boolean
+  nextStep?: QuizStep
+  nextLabel?: string
 }
 
-export function LoadingTransition({ title, subtitle }: LoadingTransitionProps) {
+export function LoadingTransition({ title, subtitle, showNextButton = false, nextStep, nextLabel = "Next" }: LoadingTransitionProps) {
+  const { setCurrentStep } = useQuizStore()
+
+  const handleNext = () => {
+    if (nextStep) {
+      setCurrentStep(nextStep)
+    }
+  }
   return (
     <div className="max-w-2xl mx-auto space-y-8">
       <div className="text-center space-y-8">
@@ -36,6 +48,15 @@ export function LoadingTransition({ title, subtitle }: LoadingTransitionProps) {
           <div className="w-2 h-2 bg-primary rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
           <div className="w-2 h-2 bg-primary rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
         </div>
+
+        {/* Next button (optional) */}
+        {showNextButton && (
+          <div className="flex justify-center pt-4">
+            <Button onClick={handleNext} size="lg" className="px-8">
+              {nextLabel}
+            </Button>
+          </div>
+        )}
       </div>
     </div>
   )
