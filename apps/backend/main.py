@@ -41,22 +41,21 @@ if cors_origins:
     production_origins = [origin.strip() for origin in cors_origins.split(",")]
     allowed_origins.extend(production_origins)
 
-# In production, you might want to be more restrictive
-environment = os.getenv("ENVIRONMENT", "development")
-if environment == "production":
-    # Only allow HTTPS origins in production
-    allowed_origins = [
-        origin
-        for origin in allowed_origins
-        if origin.startswith("https://") or origin.startswith("http://localhost")
-    ]
-
 app.add_middleware(
     CORSMiddleware,
     allow_origins=allowed_origins,
     allow_credentials=True,
-    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allow_headers=["*"],
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD"],
+    allow_headers=[
+        "Accept",
+        "Accept-Language",
+        "Content-Language",
+        "Content-Type",
+        "Authorization",
+        "X-Session-ID",
+        "x-session-id",
+    ],
+    expose_headers=["*"],
 )
 
 app.include_router(common_router)

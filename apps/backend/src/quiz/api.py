@@ -5,7 +5,7 @@ Quiz API endpoints - Route handlers for quiz operations
 from typing import List, Optional
 
 from fastapi import APIRouter, Depends, File, Header, HTTPException, UploadFile
-from fastapi.responses import StreamingResponse
+from fastapi.responses import Response, StreamingResponse
 from src.pdf.services import PdfProcessingService
 from src.quiz.dto import (
     AnswerRequest,
@@ -23,6 +23,30 @@ from src.quiz.services import (
 
 # Create Quiz router
 quiz_router = APIRouter(prefix="/quiz", tags=["Quiz"])
+
+
+@quiz_router.options("/sync")
+async def sync_options():
+    """Handle preflight requests for sync endpoint"""
+    return Response(
+        headers={
+            "Access-Control-Allow-Origin": "*",
+            "Access-Control-Allow-Methods": "POST, OPTIONS",
+            "Access-Control-Allow-Headers": "Content-Type, X-Session-ID, x-session-id, Quiz-Title",
+        }
+    )
+
+
+@quiz_router.options("/upload-pdf")
+async def upload_pdf_options():
+    """Handle preflight requests for upload-pdf endpoint"""
+    return Response(
+        headers={
+            "Access-Control-Allow-Origin": "*",
+            "Access-Control-Allow-Methods": "POST, OPTIONS",
+            "Access-Control-Allow-Headers": "Content-Type, X-Session-ID, x-session-id",
+        }
+    )
 
 
 @quiz_router.post("/sync")
