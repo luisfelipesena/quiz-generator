@@ -16,8 +16,8 @@ export default function Home() {
   const hasExistingQuiz = questions.length > 0
 
   return (
-    <div className="w-full">
-      <div className="relative min-h-[80vh] flex items-center justify-center pt-16">
+    <div className="w-full min-h-screen">
+      <div className="relative min-h-screen flex items-center justify-center pt-16">
         {/* Step transitions with animation */}
         <div className={`transition-all duration-500 ease-in-out w-full ${
           currentStep === 'upload' ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-[-100%] absolute inset-0 pointer-events-none'
@@ -46,7 +46,7 @@ export default function Home() {
         </div>
         
         <div className={`transition-all duration-500 ease-in-out w-full ${
-          currentStep === 'edit' ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-[-100%] absolute inset-0 pointer-events-none flex items-center justify-center'
+          currentStep === 'edit' ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-[-100%] absolute inset-0 pointer-events-none'
         }`}>
           <QuestionEditList />
         </div>
@@ -63,13 +63,13 @@ export default function Home() {
         </div>
         
         <div className={`transition-all duration-500 ease-in-out w-full ${
-          currentStep === 'quiz' ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-[-100%] absolute inset-0 pointer-events-none flex items-center justify-center'
+          currentStep === 'quiz' ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-[-100%] absolute inset-0 pointer-events-none'
         }`}>
           <Quiz />
         </div>
         
         <div className={`transition-all duration-500 ease-in-out w-full ${
-          currentStep === 'results' ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-[-100%] absolute inset-0 pointer-events-none flex items-center justify-center'
+          currentStep === 'results' ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-[-100%] absolute inset-0 pointer-events-none'
         }`}>
           <QuizResults />
         </div>
