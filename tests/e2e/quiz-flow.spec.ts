@@ -1,8 +1,8 @@
 import { test, expect } from '@playwright/test';
 import path from 'path';
 
-// Test file path
-const PDF_PATH = path.join(__dirname, '../../Luis CV.pdf');
+// Test file path - use PDF from tests directory
+const PDF_PATH = path.join(__dirname, '../Luis CV.pdf');
 
 test.describe('Quiz Generator E2E Tests', () => {
   test.beforeEach(async ({ page }) => {
