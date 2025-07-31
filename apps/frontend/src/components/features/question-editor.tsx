@@ -159,7 +159,12 @@ export function QuestionEditList() {
   const { questions, setCurrentStep } = useQuizStore()
 
   const handleStartQuiz = () => {
-    setCurrentStep('quiz')
+    // Show preparing screen first
+    setCurrentStep('preparing')
+    // Then transition to quiz after a short delay
+    setTimeout(() => {
+      setCurrentStep('quiz')
+    }, 2000)
   }
 
   const handleBack = () => {

@@ -2,7 +2,7 @@ import { create } from 'zustand'
 import { devtools, persist } from 'zustand/middleware'
 import { type QuestionAnswer, type AnswerResponse, type QuestionUpdateRequest } from '@/lib/api'
 
-export type QuizStep = 'upload' | 'edit' | 'quiz' | 'results'
+export type QuizStep = 'upload' | 'generating' | 'edit' | 'preparing' | 'quiz' | 'results'
 
 interface QuizAnswer {
   questionId: string

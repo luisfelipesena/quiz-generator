@@ -4,7 +4,7 @@ Quiz services - Business logic for quiz operations
 
 import json
 import os
-from typing import Dict, List, Optional, AsyncGenerator
+from typing import AsyncGenerator, Dict, List, Optional
 
 from fastapi import HTTPException
 from openai import OpenAI
@@ -28,9 +28,20 @@ class QuizGenerationService:
         if self._client is None:
             api_key = os.getenv("OPENAI_API_KEY")
             if not api_key:
+                print("=== API Key Error ===")
+                print("OPENAI_API_KEY environment variable not found")
+                print("=====================")
                 raise HTTPException(
                     status_code=500, detail="OpenAI API key not configured"
                 )
+
+            # Log API key info (first/last chars only for security)
+            print("=== API Key Debug ===")
+            print(f"Key length: {len(api_key)} characters")
+            print(f"Key starts with: {api_key[:7]}...")
+            print(f"Key ends with: ...{api_key[-4:]}")
+            print("====================")
+
             self._client = OpenAI(api_key=api_key)
         return self._client
 
@@ -53,6 +64,7 @@ class QuizGenerationService:
         try:
             prompt = self._build_generation_prompt(text, num_questions)
 
+            # Add timeout and retry logic
             response = self.client.chat.completions.create(
                 model="gpt-3.5-turbo",
                 messages=[
@@ -63,19 +75,85 @@ class QuizGenerationService:
                     {"role": "user", "content": prompt},
                 ],
                 temperature=0.7,
+                timeout=30,  # 30 second timeout
             )
 
-            questions_data = json.loads(response.choices[0].message.content)
+            # Check if response and content exist
+            if not response.choices or not response.choices[0].message.content:
+                print("=== OpenAI Empty Response Debug ===")
+                print(f"Response: {response}")
+                print(f"Choices: {response.choices if response else 'No response'}")
+                print("===================================")
+                raise HTTPException(
+                    status_code=500, detail="Empty response from OpenAI API"
+                )
+
+            content = response.choices[0].message.content.strip()
+            if not content:
+                print("=== OpenAI Empty Content Debug ===")
+                print(f"Raw content: '{response.choices[0].message.content}'")
+                print("==================================")
+                raise HTTPException(
+                    status_code=500, detail="Empty content from OpenAI API"
+                )
+
+            # Log successful response for debugging
+            print("=== OpenAI Response Debug ===")
+            print(f"Content length: {len(content)} characters")
+            print(f"First 200 chars: {content[:200]}...")
+            print("=============================")
+
+            # Try to parse JSON response
+            try:
+                questions_data = json.loads(content)
+            except json.JSONDecodeError as e:
+                # Log the problematic content for debugging
+                print("=== JSON Parse Error Debug ===")
+                print(f"Error: {str(e)}")
+                print(f"Content: {content}")
+                print("==============================")
+                raise HTTPException(
+                    status_code=500,
+                    detail=f"Invalid JSON response from OpenAI: {str(e)}",
+                )
+
+            # Validate response format
+            if not isinstance(questions_data, list):
+                raise HTTPException(
+                    status_code=500, detail="OpenAI response is not a JSON array"
+                )
+
+            if len(questions_data) == 0:
+                raise HTTPException(
+                    status_code=500, detail="OpenAI returned empty questions array"
+                )
 
             questions = []
             for i, q in enumerate(questions_data[:num_questions]):
-                questions.append(
-                    QuestionAnswer(
-                        id=str(i + 1),
-                        question=q["question"],
-                        answer=q["answer"],
-                        options=q.get("options", []),
+                try:
+                    # Validate question structure
+                    if not isinstance(q, dict):
+                        raise ValueError(f"Question {i+1} is not a valid object")
+
+                    if "question" not in q or "answer" not in q:
+                        raise ValueError(f"Question {i+1} missing required fields")
+
+                    questions.append(
+                        QuestionAnswer(
+                            id=str(i + 1),
+                            question=str(q["question"]).strip(),
+                            answer=str(q["answer"]).strip(),
+                            options=q.get("options", []),
+                        )
                     )
+                except (KeyError, ValueError) as e:
+                    raise HTTPException(
+                        status_code=500, detail=f"Invalid question format: {str(e)}"
+                    )
+
+            if len(questions) == 0:
+                raise HTTPException(
+                    status_code=500, detail="No valid questions generated"
                 )
 
             return questions
@@ -85,33 +163,44 @@ class QuizGenerationService:
                 status_code=500, detail=f"Failed to parse OpenAI response: {str(e)}"
             )
         except Exception as e:
+            # Log detailed error information for debugging
+            print("=== OpenAI Error Debug Info ===")
+            print(f"Error type: {type(e).__name__}")
+            print(f"Error message: {str(e)}")
+            print(f"Prompt used: {prompt[:500]}...")
+            print(f"Text length: {len(text)} characters")
+            print("===============================")
+
             raise HTTPException(
                 status_code=500, detail=f"Error generating questions: {str(e)}"
             )
 
     def _build_generation_prompt(self, text: str, num_questions: int) -> str:
         """Build the prompt for OpenAI question generation"""
-        return f"""
-        Based on the following text, generate exactly {num_questions} multiple-choice questions with 4 options each.
-        
-        Format your response as a JSON array with this structure:
-        [
-            {{
-                "question": "Question text here?",
-                "answer": "Correct answer text",
-                "options": ["Option A", "Option B", "Option C", "Option D"]
-            }}
-        ]
-        
-        Make sure:
-        - Questions are clear and specific
-        - Each question has exactly 4 options
-        - The correct answer is one of the 4 options
-        - Questions cover different aspects of the content
-        - Return valid JSON only
-        
-        Text: {text[:4000]}
-        """
+        return f"""You are an expert quiz generator. Create exactly {num_questions} multiple-choice questions based on the provided text.
+
+CRITICAL: Respond with ONLY a valid JSON array. No extra text, explanations, or formatting.
+
+Required JSON format:
+[
+    {{
+        "question": "Clear, specific question text?",
+        "answer": "Exact text of correct answer",
+        "options": ["Option 1", "Option 2", "Option 3", "Option 4"]
+    }}
+]
+
+Requirements:
+- Each question must have exactly 4 options
+- The correct answer must be one of the 4 options (exact match)
+- Questions should cover different topics from the text
+- Use clear, grammatically correct language
+- Ensure all JSON is properly formatted with correct quotes and brackets
+
+Text to analyze:
+{text[:3500]}
+
+Generate {num_questions} questions now:"""
 
 
 class QuizManagementService:
@@ -200,30 +289,32 @@ class QuizManagementService:
             correct=is_correct, correct_answer=correct_answer, explanation=explanation
         )
 
-    async def get_streaming_feedback(self, answer_request: AnswerRequest) -> AsyncGenerator[str, None]:
+    async def get_streaming_feedback(
+        self, answer_request: AnswerRequest
+    ) -> AsyncGenerator[str, None]:
         """
         Get personalized streaming feedback for incorrect answers using OpenAI
-        
+
         Args:
             answer_request: The answer to check and provide feedback for
-            
+
         Yields:
             Streaming text chunks with personalized feedback
-            
+
         Raises:
             HTTPException: If question not found or streaming fails
         """
         question = self.get_question_by_id(answer_request.question_id)
-        
+
         if not question:
             raise HTTPException(status_code=404, detail="Question not found")
-        
+
         correct_answer = question.answer
         user_answer = answer_request.user_answer.strip()
-        
+
         # Check if the user's answer matches the correct answer (case-insensitive)
         is_correct = user_answer.lower() == correct_answer.lower()
-        
+
         # If it's a multiple choice question, also check if any option matches
         if not is_correct and question.options:
             for option in question.options:
@@ -233,21 +324,23 @@ class QuizManagementService:
                 ):
                     is_correct = True
                     break
-        
+
         # If answer is correct, just return simple confirmation
         if is_correct:
             yield "data: Correct! Well done!\n\n"
             return
-        
+
         # For incorrect answers, generate personalized streaming feedback
         try:
             # Initialize OpenAI client
             api_key = os.getenv("OPENAI_API_KEY")
             if not api_key:
-                raise HTTPException(status_code=500, detail="OpenAI API key not configured")
-            
+                raise HTTPException(
+                    status_code=500, detail="OpenAI API key not configured"
+                )
+
             client = OpenAI(api_key=api_key)
-            
+
             # Build prompt for personalized feedback
             feedback_prompt = f"""
             The user answered a quiz question incorrectly. Provide helpful, encouraging feedback.
@@ -263,31 +356,31 @@ class QuizManagementService:
             
             Keep it concise (2-3 sentences max) and encouraging. Be supportive, not critical.
             """
-            
+
             # Stream the response from OpenAI
             stream = client.chat.completions.create(
                 model="gpt-3.5-turbo",
                 messages=[
                     {
-                        "role": "system", 
-                        "content": "You are a supportive tutor providing encouraging feedback on quiz answers. Be brief, clear, and motivating."
+                        "role": "system",
+                        "content": "You are a supportive tutor providing encouraging feedback on quiz answers. Be brief, clear, and motivating.",
                     },
-                    {"role": "user", "content": feedback_prompt}
+                    {"role": "user", "content": feedback_prompt},
                 ],
                 stream=True,
                 temperature=0.7,
-                max_tokens=150
+                max_tokens=150,
             )
-            
+
             # Yield each chunk as Server-Sent Events format
             for chunk in stream:
                 if chunk.choices[0].delta.content is not None:
                     content = chunk.choices[0].delta.content
                     yield f"data: {content}\n\n"
-            
+
             # Signal end of stream
             yield "data: [DONE]\n\n"
-            
+
         except Exception as e:
             # Fallback to basic feedback if streaming fails
             yield f"data: The correct answer is: {correct_answer}. {str(e)}\n\n"

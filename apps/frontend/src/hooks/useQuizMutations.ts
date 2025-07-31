@@ -9,15 +9,37 @@ export function useUploadPdfMutation() {
   const { setQuestions, setCurrentStep } = useQuizStore()
   
   return useMutation<QuizResponse, ApiError, File>({
-    mutationFn: api.uploadPdfAndGenerateQuiz,
+    mutationFn: async (file: File) => {
+      // Start generating step immediately
+      setCurrentStep('generating')
+      return api.uploadPdfAndGenerateQuiz(file)
+    },
     onSuccess: (data: QuizResponse) => {
       setQuestions(data.questions)
+      // Show success for a moment, then transition to edit
       setTimeout(() => {
         setCurrentStep('edit')
-      }, 1000)
+      }, 1500)
     },
     onError: (error: ApiError) => {
       console.error('PDF upload failed:', error)
+      // Return to upload step on error
+      setCurrentStep('upload')
+      
+      // Show user-friendly error message
+      let userMessage = 'Failed to generate quiz. Please try again.'
+      
+      if (error.message.includes('OpenAI')) {
+        userMessage = 'AI service temporarily unavailable. Please try again.'
+      } else if (error.message.includes('PDF')) {
+        userMessage = 'Error processing PDF. Please check if the file is valid.'
+      } else if (error.status === 500) {
+        userMessage = 'Server error. Please try again in a moment.'
+      }
+      
+      // You could show this message in a toast notification
+      // For now, we'll log it
+      console.warn('User-friendly error:', userMessage)
     },
   })
 }

@@ -77,7 +77,7 @@ quiz-generator/
     # apps/backend/.env
     OPENAI_API_KEY=sk-your-openai-api-key-here
     
-    # apps/frontend/.env.local
+    # apps/frontend/.env
     NEXT_PUBLIC_API_URL=http://localhost:8000
     ```
 

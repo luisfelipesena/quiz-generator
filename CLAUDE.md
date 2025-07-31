@@ -107,7 +107,7 @@ The API uses a consistent pattern:
 
 ### Environment Variables Required
 - **Backend**: `OPENAI_API_KEY` in `apps/backend/.env`
-- **Frontend**: `NEXT_PUBLIC_API_URL` in `apps/frontend/.env.local` (defaults to http://localhost:8000)
+- **Frontend**: `NEXT_PUBLIC_API_URL` in `apps/frontend/.env` (defaults to http://localhost:8000)
 
 ### Common Issues
 - **Port conflicts**: Use `bun run clean:ports` to kill existing processes

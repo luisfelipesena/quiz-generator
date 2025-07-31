@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import { useQuizAnswer } from '@/hooks/useQuizMutations'
 import { useStreamingFeedback } from '@/hooks/useStreamingFeedback'
 import { useQuizStore } from '@/stores/quiz-store'
+import { PdfIcon } from '@/components/icons'
 
 export function Quiz() {
   const [selectedAnswer, setSelectedAnswer] = useState<string>('')
@@ -80,12 +81,11 @@ export function Quiz() {
           </svg>
         </button>
         <div className="flex items-center gap-3">
-          <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <rect x="2" y="2" width="6" height="6" rx="1" fill="currentColor" className="text-primary"/>
-            <rect x="12" y="2" width="6" height="6" rx="1" fill="currentColor" className="text-muted"/>
-            <rect x="2" y="12" width="6" height="6" rx="1" fill="currentColor" className="text-muted"/>
-            <rect x="12" y="12" width="6" height="6" rx="1" fill="currentColor" className="text-muted"/>
-          </svg>
+          <PdfIcon 
+            width={20} 
+            height={20} 
+            className="text-primary" 
+          />
           <h1 className="text-xl font-semibold text-foreground">Mathematics Quiz</h1>
         </div>
         <div className="ml-auto">

@@ -1,9 +1,9 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import Image from 'next/image'
 import { Check, X, Share, Download, Copy, RotateCcw, ChevronDown } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { SuccessIcon } from '@/components/icons'
 import { DropdownMenu, DropdownMenuItem } from '@/components/ui/dropdown-menu'
 import { UserNameModal } from '@/components/features/user-name-modal'
 import { useQuizStore } from '@/stores/quiz-store'
@@ -76,12 +76,10 @@ export function QuizResults() {
         {/* Results Header */}
         <div className="text-center space-y-6">
           <div className="inline-flex items-center justify-center w-24 h-24">
-            <Image
-              src="/images/success-icon.png"
-              alt="Success"
-              width={96}
-              height={96}
-              className="object-contain"
+            <SuccessIcon 
+              width={96} 
+              height={96} 
+              className="text-green-600" 
             />
           </div>
           <div className="space-y-2">

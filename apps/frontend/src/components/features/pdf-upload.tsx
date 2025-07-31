@@ -1,9 +1,9 @@
 'use client'
 
 import React, { useState } from 'react'
-import Image from 'next/image'
 import { AlertCircle, Loader2, CheckCircle2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { UnstuckIcon, PdfIcon } from '@/components/icons'
 import { 
   FileUpload, 
   FileUploadDropzone, 
@@ -41,12 +41,10 @@ export function PdfUpload() {
       {/* Header Section */}
       <div className="text-center space-y-3">
         <div className="flex items-center justify-center gap-3">
-          <Image
-            src="/images/unstuck-icon.png"
-            alt="Unstuck icon"
-            width={32}
-            height={32}
-            className="object-contain"
+          <UnstuckIcon 
+            width={32} 
+            height={32} 
+            className="text-primary" 
           />
           <h1 className="text-3xl font-semibold text-foreground">
             Unstuck Quiz Generator
@@ -71,12 +69,10 @@ export function PdfUpload() {
           <FileUploadDropzone className="border-2 border-dashed border-gray-300 rounded-xl p-16 text-center cursor-pointer transition-all duration-200 hover:border-primary/60 hover:bg-gray-50/50 bg-white">
             {/* PDF Icon */}
             <div className="flex justify-center mb-6">
-              <Image
-                src="/images/pdfs-icon.png"
-                alt="PDF icon"
-                width={64}
-                height={64}
-                className="object-contain"
+              <PdfIcon 
+                width={64} 
+                height={64} 
+                className="text-muted-foreground" 
               />
             </div>
 

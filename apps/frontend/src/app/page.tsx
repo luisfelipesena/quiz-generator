@@ -1,6 +1,7 @@
 'use client'
 
 import { PdfUpload } from '@/components/features/pdf-upload'
+import { LoadingTransition } from '@/components/features/loading-transition'
 import { QuestionEditList } from '@/components/features/question-editor'
 import { Quiz } from '@/components/features/quiz'
 import { QuizResults } from '@/components/features/quiz-results'
@@ -20,9 +21,27 @@ export default function Home() {
         </div>
         
         <div className={`transition-all duration-500 ease-in-out ${
+          currentStep === 'generating' ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-[-100%] absolute inset-0 pointer-events-none'
+        }`}>
+          <LoadingTransition 
+            title="Generating Quiz Questions"
+            subtitle="Reading your materials..."
+          />
+        </div>
+        
+        <div className={`transition-all duration-500 ease-in-out ${
           currentStep === 'edit' ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-[-100%] absolute inset-0 pointer-events-none'
         }`}>
           <QuestionEditList />
+        </div>
+        
+        <div className={`transition-all duration-500 ease-in-out ${
+          currentStep === 'preparing' ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-[-100%] absolute inset-0 pointer-events-none'
+        }`}>
+          <LoadingTransition 
+            title="Preparing Quiz for Practice"
+            subtitle="Preparing the quiz so you can now practice..."
+          />
         </div>
         
         <div className={`transition-all duration-500 ease-in-out ${
@@ -43,10 +62,10 @@ export default function Home() {
         <div className="bg-card/80 backdrop-blur-sm border rounded-full px-4 py-2 shadow-lg">
           <div className="flex space-x-2">
             <div className={`w-2 h-2 rounded-full transition-all duration-300 ${
-              currentStep === 'upload' ? 'bg-primary' : 'bg-muted'
+              ['upload', 'generating'].includes(currentStep) ? 'bg-primary' : 'bg-muted'
             }`} />
             <div className={`w-2 h-2 rounded-full transition-all duration-300 ${
-              currentStep === 'edit' ? 'bg-primary' : 'bg-muted'
+              ['edit', 'preparing'].includes(currentStep) ? 'bg-primary' : 'bg-muted'
             }`} />
             <div className={`w-2 h-2 rounded-full transition-all duration-300 ${
               currentStep === 'quiz' ? 'bg-primary' : 'bg-muted'
