@@ -24,7 +24,7 @@ export default function RootLayout({
         className={`${inter.variable} font-sans antialiased`}
       >
         <QueryProvider>
-          <main className="min-h-screen bg-white px-4 sm:px-6 lg:px-8">
+          <main className="min-h-screen bg-background px-4 sm:px-6 lg:px-8">
             <div className="w-full max-w-7xl mx-auto">
               {children}
             </div>

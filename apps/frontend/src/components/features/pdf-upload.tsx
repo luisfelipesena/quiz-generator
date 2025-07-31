@@ -77,16 +77,16 @@ export function PdfUpload() {
 
             {/* Upload Content */}
             <div className="space-y-3">
-              <FileUploadTrigger asChild>
-                <Button variant="link" className="text-primary hover:text-primary/80 font-medium text-base p-0 h-auto">
-                  Click to upload
-                </Button>
-              </FileUploadTrigger>
               <p className="text-gray-500 text-base">
-                or drag and drop files
+                <FileUploadTrigger asChild>
+                  <Button variant="link" className="text-primary hover:text-primary/80 font-bold text-base p-0 h-auto inline">
+                    Click to upload
+                  </Button>
+                </FileUploadTrigger>
+                {" "}or drag and drop files
               </p>
               <p className="text-sm text-gray-400 mt-4">
-                Drop Course Materials and start generating - for <span className="uppercase font-medium">FREE</span>
+                Drop Course Materials and start generating - for <span className="uppercase font-bold">FREE</span>
               </p>
             </div>
           </FileUploadDropzone>
