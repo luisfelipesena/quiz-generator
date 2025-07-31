@@ -14,7 +14,7 @@
     "format": "ruff format .",
     "type-check": "mypy . --ignore-missing-imports",
     "clean": "find . -type d -name __pycache__ -exec rm -rf {} + 2>/dev/null || true",
-    "install": "pip install -r requirements.txt",
+    "install:deps": "pip install -r requirements.txt",
     "setup": "python -m venv venv && source venv/bin/activate && pip install -r requirements.txt"
   },
   "dependencies": {},
