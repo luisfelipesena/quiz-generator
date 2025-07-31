@@ -1,15 +1,19 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Check, X } from 'lucide-react'
+import { Check, X, Share, Download, Copy, RotateCcw, ChevronDown } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { DropdownMenu, DropdownMenuItem } from '@/components/ui/dropdown-menu'
 import { UserNameModal } from '@/components/features/user-name-modal'
 import { useQuizStore } from '@/stores/quiz-store'
+import { useShareResults } from '@/hooks/useShareResults'
 
 export function QuizResults() {
   const { questions, answers, getScore, resetQuiz, userName } = useQuizStore()
   const { correct, total } = getScore()
   const [showNameModal, setShowNameModal] = useState(false)
+  const [shareMessage, setShareMessage] = useState('')
+  const { shareAsText, downloadAsPDF, copyToClipboard } = useShareResults()
 
   // Show name modal if user name is not set
   useEffect(() => {
@@ -24,6 +28,37 @@ export function QuizResults() {
 
   const getFirstName = () => {
     return userName.split(' ')[0] || userName
+  }
+
+  const handleShare = async (method: 'native' | 'download' | 'copy') => {
+    try {
+      let result
+      switch (method) {
+        case 'native':
+          result = await shareAsText()
+          break
+        case 'download':
+          result = downloadAsPDF()
+          break
+        case 'copy':
+          result = await copyToClipboard()
+          break
+      }
+      
+      if (result.success) {
+        const messages: Record<string, string> = {
+          native: 'Results shared successfully!',
+          clipboard: 'Results copied to clipboard!',
+          download: 'Results downloaded successfully!'
+        }
+        setShareMessage(messages[result.method] || 'Results shared!')
+        setTimeout(() => setShareMessage(''), 3000)
+      }
+    } catch (error) {
+      console.error('Share failed:', error)
+      setShareMessage('Failed to share results')
+      setTimeout(() => setShareMessage(''), 3000)
+    }
   }
 
 
@@ -72,16 +107,60 @@ export function QuizResults() {
           </div>
         </div>
 
-        {/* Action Button */}
-        <div className="text-center">
-          <Button 
-            onClick={resetQuiz} 
-            size="lg"
-            className="px-8 py-3 text-base font-medium rounded-lg"
+        {/* Action Buttons */}
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+          <DropdownMenu
+            trigger={
+              <Button 
+                size="lg"
+                className="px-8 py-3 text-base font-medium rounded-lg flex items-center gap-2"
+              >
+                <Share className="w-4 h-4" />
+                Share results
+                <ChevronDown className="w-4 h-4" />
+              </Button>
+            }
           >
-            Share results →
+            <DropdownMenuItem 
+              onClick={() => handleShare('native')}
+              icon={<Share className="w-4 h-4" />}
+            >
+              Share via system
+            </DropdownMenuItem>
+            <DropdownMenuItem 
+              onClick={() => handleShare('copy')}
+              icon={<Copy className="w-4 h-4" />}
+            >
+              Copy to clipboard
+            </DropdownMenuItem>
+            <DropdownMenuItem 
+              onClick={() => handleShare('download')}
+              icon={<Download className="w-4 h-4" />}
+            >
+              Download as file
+            </DropdownMenuItem>
+          </DropdownMenu>
+          
+          <Button 
+            onClick={resetQuiz}
+            variant="outline"
+            size="lg"
+            className="px-6 py-3 text-base font-medium rounded-lg flex items-center gap-2"
+          >
+            <RotateCcw className="w-4 h-4" />
+            Take Another Quiz
           </Button>
         </div>
+        
+        {/* Share Success Message */}
+        {shareMessage && (
+          <div className="text-center">
+            <div className="inline-flex items-center gap-2 px-4 py-2 bg-green-50 text-green-700 rounded-lg border border-green-200 animate-in fade-in slide-in-from-bottom-2 duration-300">
+              <Check className="w-4 h-4" />
+              <span className="text-sm font-medium">{shareMessage}</span>
+            </div>
+          </div>
+        )}
 
         {/* Result Summary */}
         <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
