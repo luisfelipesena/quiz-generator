@@ -2,12 +2,14 @@
 
 import { useState } from 'react'
 import { Edit3, Check } from 'lucide-react'
+import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
 import { type QuestionAnswer, type QuestionUpdateRequest } from '@/lib/api'
 import { useQuizStore } from '@/stores/quiz-store'
+import { useSessionId } from '@/hooks/useSessionId'
 import { UnstuckIcon, BackArrowIcon } from '@/components/icons'
 
 interface QuestionEditorProps {
@@ -19,6 +21,7 @@ export function QuestionEditor({ question, index }: QuestionEditorProps) {
   const [isEditing, setIsEditing] = useState(false)
   const [editedQuestion, setEditedQuestion] = useState(question)
   const { updateQuestion } = useQuizStore()
+  const sessionId = useSessionId()
 
   const handleSave = () => {
     const questionUpdate: QuestionUpdateRequest = {
@@ -27,8 +30,9 @@ export function QuestionEditor({ question, index }: QuestionEditorProps) {
       answer: editedQuestion.answer,
       options: editedQuestion.options,
     }
-    updateQuestion(question.id, questionUpdate)
+    updateQuestion(question.id, questionUpdate, sessionId)
     setIsEditing(false)
+    toast.success('Question updated successfully!')
   }
 
   const handleCancel = () => {

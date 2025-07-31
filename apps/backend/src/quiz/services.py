@@ -29,8 +29,8 @@ class QuizGenerationService:
             api_key = os.getenv("OPENAI_API_KEY")
             if not api_key:
                 raise HTTPException(
-                    status_code=500, 
-                    detail="OpenAI API key not configured. Please check your environment variables."
+                    status_code=500,
+                    detail="OpenAI API key not configured. Please check your environment variables.",
                 )
 
             self._client = OpenAI(api_key=api_key)
@@ -72,13 +72,15 @@ class QuizGenerationService:
             # Check if response and content exist
             if not response.choices or not response.choices[0].message.content:
                 raise HTTPException(
-                    status_code=500, detail="OpenAI returned empty response. Please try again."
+                    status_code=500,
+                    detail="OpenAI returned empty response. Please try again.",
                 )
 
             content = response.choices[0].message.content.strip()
             if not content:
                 raise HTTPException(
-                    status_code=500, detail="OpenAI returned empty content. Please try again."
+                    status_code=500,
+                    detail="OpenAI returned empty content. Please try again.",
                 )
 
             # Try to parse JSON response
@@ -93,12 +95,14 @@ class QuizGenerationService:
             # Validate response format
             if not isinstance(questions_data, list):
                 raise HTTPException(
-                    status_code=500, detail="Invalid response format from AI. Please try again."
+                    status_code=500,
+                    detail="Invalid response format from AI. Please try again.",
                 )
 
             if len(questions_data) == 0:
                 raise HTTPException(
-                    status_code=500, detail="AI did not generate any questions. Please try again."
+                    status_code=500,
+                    detail="AI did not generate any questions. Please try again.",
                 )
 
             questions = []
@@ -111,29 +115,51 @@ class QuizGenerationService:
                     if "question" not in q or "answer" not in q:
                         raise ValueError(f"Question {i+1} missing required fields")
 
+                    question_text = str(q["question"]).strip()
+                    correct_answer = str(q["answer"]).strip()
+                    options = q.get("options", [])
+                    
+                    # Validate that correct answer is in options
+                    if options and correct_answer not in options:
+                        # Try to find a case-insensitive match
+                        matching_option = None
+                        for option in options:
+                            if option.lower() == correct_answer.lower():
+                                matching_option = option
+                                break
+                        
+                        if matching_option:
+                            correct_answer = matching_option
+                        else:
+                            # Skip this question if correct answer not in options
+                            continue
+                    
                     questions.append(
                         QuestionAnswer(
                             id=str(i + 1),
-                            question=str(q["question"]).strip(),
-                            answer=str(q["answer"]).strip(),
-                            options=q.get("options", []),
+                            question=question_text,
+                            answer=correct_answer,
+                            options=options,
                         )
                     )
                 except (KeyError, ValueError):
                     raise HTTPException(
-                        status_code=500, detail="AI generated malformed questions. Please try again."
+                        status_code=500,
+                        detail="AI generated malformed questions. Please try again.",
                     )
 
             if len(questions) == 0:
                 raise HTTPException(
-                    status_code=500, detail="Failed to generate valid questions. Please try again."
+                    status_code=500,
+                    detail="Failed to generate valid questions. Please try again.",
                 )
 
             return questions
 
         except json.JSONDecodeError:
             raise HTTPException(
-                status_code=500, detail="Failed to process AI response. Please try again."
+                status_code=500,
+                detail="Failed to process AI response. Please try again.",
             )
         except Exception as e:
             # Provide user-friendly error messages based on error type
@@ -146,7 +172,7 @@ class QuizGenerationService:
                 detail = "AI service took too long to respond. Please try again."
             else:
                 detail = "Failed to generate questions. Please try again."
-            
+
             raise HTTPException(status_code=500, detail=detail)
 
     def _build_generation_prompt(self, text: str, num_questions: int) -> str:
@@ -181,24 +207,30 @@ class QuizManagementService:
     """Service for managing quiz questions and answers"""
 
     def __init__(self):
-        # In-memory storage for questions (in production, use a database)
-        self.questions_storage: Dict[str, QuestionAnswer] = {}
+        # In-memory storage for questions by session (in production, use a database)
+        # Format: {session_id: {question_id: QuestionAnswer}}
+        self.sessions_storage: Dict[str, Dict[str, QuestionAnswer]] = {}
 
-    def store_questions(self, questions: List[QuestionAnswer]) -> None:
-        """Store questions in memory storage"""
+    def store_questions(self, questions: List[QuestionAnswer], session_id: str = "default") -> None:
+        """Store questions in memory storage by session"""
+        if session_id not in self.sessions_storage:
+            self.sessions_storage[session_id] = {}
+        
         for question in questions:
-            self.questions_storage[question.id] = question
+            self.sessions_storage[session_id][question.id] = question
 
-    def get_question_by_id(self, question_id: str) -> Optional[QuestionAnswer]:
-        """Retrieve a question by its ID"""
-        return self.questions_storage.get(question_id)
+    def get_question_by_id(self, question_id: str, session_id: str = "default") -> Optional[QuestionAnswer]:
+        """Retrieve a question by its ID for a specific session"""
+        session_questions = self.sessions_storage.get(session_id, {})
+        return session_questions.get(question_id)
 
-    def update_question(self, question_update: QuestionUpdateRequest) -> QuestionAnswer:
+    def update_question(self, question_update: QuestionUpdateRequest, session_id: str = "default") -> QuestionAnswer:
         """
-        Update an existing question
+        Update an existing question for a specific session
 
         Args:
             question_update: The updated question data
+            session_id: The session ID
 
         Returns:
             Updated QuestionAnswer object
@@ -206,8 +238,16 @@ class QuizManagementService:
         Raises:
             HTTPException: If question not found
         """
-        if question_update.id not in self.questions_storage:
+        session_questions = self.sessions_storage.get(session_id, {})
+        if question_update.id not in session_questions:
             raise HTTPException(status_code=404, detail="Question not found")
+
+        # Validate that the correct answer is one of the options
+        if question_update.options and question_update.answer not in question_update.options:
+            raise HTTPException(
+                status_code=400, 
+                detail="Correct answer must be one of the multiple choice options"
+            )
 
         updated_question = QuestionAnswer(
             id=question_update.id,
@@ -216,15 +256,16 @@ class QuizManagementService:
             options=question_update.options,
         )
 
-        self.questions_storage[question_update.id] = updated_question
+        self.sessions_storage[session_id][question_update.id] = updated_question
         return updated_question
 
-    def check_answer(self, answer_request: AnswerRequest) -> AnswerResponse:
+    def check_answer(self, answer_request: AnswerRequest, session_id: str = "default") -> AnswerResponse:
         """
-        Check if the provided answer is correct
+        Check if the provided answer is correct for a specific session
 
         Args:
             answer_request: The answer to check
+            session_id: The session ID
 
         Returns:
             AnswerResponse with correctness and explanation
@@ -232,7 +273,7 @@ class QuizManagementService:
         Raises:
             HTTPException: If question not found
         """
-        question = self.get_question_by_id(answer_request.question_id)
+        question = self.get_question_by_id(answer_request.question_id, session_id)
 
         if not question:
             raise HTTPException(status_code=404, detail="Question not found")
@@ -264,13 +305,14 @@ class QuizManagementService:
         )
 
     async def get_streaming_feedback(
-        self, answer_request: AnswerRequest
+        self, answer_request: AnswerRequest, session_id: str = "default"
     ) -> AsyncGenerator[str, None]:
         """
         Get personalized streaming feedback for incorrect answers using OpenAI
 
         Args:
             answer_request: The answer to check and provide feedback for
+            session_id: The session ID
 
         Yields:
             Streaming text chunks with personalized feedback
@@ -278,7 +320,7 @@ class QuizManagementService:
         Raises:
             HTTPException: If question not found or streaming fails
         """
-        question = self.get_question_by_id(answer_request.question_id)
+        question = self.get_question_by_id(answer_request.question_id, session_id)
 
         if not question:
             raise HTTPException(status_code=404, detail="Question not found")
@@ -360,9 +402,10 @@ class QuizManagementService:
             yield f"data: The correct answer is: {correct_answer}. {str(e)}\n\n"
 
 
-# Global singleton instances
+# Global singleton instances - Best approach could be to use a database
 _quiz_generation_service: Optional[QuizGenerationService] = None
 _quiz_management_service: Optional[QuizManagementService] = None
+
 
 # Dependency injection functions for FastAPI
 def get_quiz_generation_service() -> QuizGenerationService:

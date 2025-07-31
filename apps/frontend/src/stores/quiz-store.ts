@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 import { devtools, persist } from 'zustand/middleware'
-import { type QuestionAnswer, type AnswerResponse, type QuestionUpdateRequest } from '@/lib/api'
+import { type QuestionAnswer, type AnswerResponse, type QuestionUpdateRequest, api } from '@/lib/api'
 
 export type QuizStep = 'upload' | 'generating' | 'edit' | 'preparing' | 'quiz' | 'results'
 
@@ -34,7 +34,7 @@ interface QuizActions {
   setCurrentStep: (step: QuizStep) => void
   setUserName: (name: string) => void
   setQuestions: (questions: QuestionAnswer[]) => void
-  updateQuestion: (questionId: string, questionUpdate: QuestionUpdateRequest) => void
+  updateQuestion: (questionId: string, questionUpdate: QuestionUpdateRequest, sessionId?: string) => void
   
   // Quiz actions
   startQuiz: () => void
@@ -72,7 +72,8 @@ export const useQuizStore = create<QuizState & QuizActions>()(
         answers: [],
       }),
       
-      updateQuestion: (questionId, questionUpdate) =>
+      updateQuestion: async (questionId, questionUpdate, sessionId) => {
+        // Update local state immediately for optimistic updates
         set((state) => ({
           editedQuestions: {
             ...state.editedQuestions,
@@ -83,7 +84,18 @@ export const useQuizStore = create<QuizState & QuizActions>()(
               options: questionUpdate.options,
             },
           },
-        })),
+        }))
+        
+        // Sync with backend if sessionId is provided
+        if (sessionId) {
+          try {
+            await api.updateQuestion(questionId, questionUpdate, sessionId)
+          } catch (error) {
+            console.error('Failed to sync question update to backend:', error)
+            // The local state is already updated, so this is just for backend sync
+          }
+        }
+      },
 
       startQuiz: () =>
         set({

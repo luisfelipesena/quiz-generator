@@ -1,21 +1,25 @@
 import { useMutation } from '@tanstack/react-query'
+import { toast } from 'sonner'
 import { api, type AnswerRequest, type AnswerResponse, type QuizResponse, ApiError } from '@/lib/api'
 import { useQuizStore } from '@/stores/quiz-store'
+import { useSessionId } from './useSessionId'
 
 /**
  * Hook for handling PDF upload and quiz generation
  */
 export function useUploadPdfMutation() {
   const { setQuestions, setCurrentStep } = useQuizStore()
+  const sessionId = useSessionId()
   
   return useMutation<QuizResponse, ApiError, File>({
     mutationFn: async (file: File) => {
       // Start generating step immediately
       setCurrentStep('generating')
-      return api.uploadPdfAndGenerateQuiz(file)
+      return api.uploadPdfAndGenerateQuiz(file, sessionId)
     },
     onSuccess: (data: QuizResponse) => {
       setQuestions(data.questions)
+      toast.success(`Generated ${data.questions.length} questions successfully!`)
       // Show success for a moment, then transition to edit
       setTimeout(() => {
         setCurrentStep('edit')
@@ -26,7 +30,7 @@ export function useUploadPdfMutation() {
       // Return to upload step on error
       setCurrentStep('upload')
       
-      // Show user-friendly error message
+      // Show user-friendly error message in toast
       let userMessage = 'Failed to generate quiz. Please try again.'
       
       if (error.message.includes('OpenAI')) {
@@ -37,9 +41,7 @@ export function useUploadPdfMutation() {
         userMessage = 'Server error. Please try again in a moment.'
       }
       
-      // You could show this message in a toast notification
-      // For now, we'll log it
-      console.warn('User-friendly error:', userMessage)
+      toast.error(userMessage)
     },
   })
 }
@@ -48,10 +50,21 @@ export function useUploadPdfMutation() {
  * Hook for checking quiz answers
  */
 export function useCheckAnswerMutation() {
+  const sessionId = useSessionId()
+  
   return useMutation<AnswerResponse, ApiError, AnswerRequest>({
-    mutationFn: api.checkAnswer,
+    mutationFn: (answerRequest: AnswerRequest) => api.checkAnswer(answerRequest, sessionId),
     onError: (error: ApiError) => {
       console.error('Answer check failed:', error)
+      
+      let errorMessage = 'Failed to check answer. Please try again.'
+      if (error.status === 404) {
+        errorMessage = 'Question not found. Please refresh and try again.'
+      } else if (error.status === 500) {
+        errorMessage = 'Server error while checking answer. Please try again.'
+      }
+      
+      toast.error(errorMessage)
     },
   })
 }

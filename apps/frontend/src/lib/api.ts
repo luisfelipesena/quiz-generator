@@ -144,36 +144,52 @@ export const api = {
   // Quiz Management  
   // ========================================================================
   
-  async uploadPdfAndGenerateQuiz(file: File): Promise<QuizResponse> {
+  async uploadPdfAndGenerateQuiz(file: File, sessionId?: string): Promise<QuizResponse> {
     const formData = new FormData()
     formData.append('file', file)
 
+    const headers: Record<string, string> = {}
+    if (sessionId) {
+      headers['X-Session-Id'] = sessionId
+    }
+
     const response = await fetch(`${API_BASE_URL}/quiz/upload-pdf`, {
       method: 'POST',
+      headers,
       body: formData,
     })
 
     return handleApiResponse(response, QuizResponseSchema)
   },
 
-  async updateQuestion(questionId: string, questionUpdate: QuestionUpdateRequest): Promise<QuestionAnswer> {
+  async updateQuestion(questionId: string, questionUpdate: QuestionUpdateRequest, sessionId?: string): Promise<QuestionAnswer> {
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+    }
+    if (sessionId) {
+      headers['X-Session-Id'] = sessionId
+    }
+
     const response = await fetch(`${API_BASE_URL}/quiz/questions/${questionId}`, {
       method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers,
       body: JSON.stringify(questionUpdate),
     })
 
     return handleApiResponse(response, QuestionAnswerSchema)
   },
 
-  async checkAnswer(answerRequest: AnswerRequest): Promise<AnswerResponse> {
+  async checkAnswer(answerRequest: AnswerRequest, sessionId?: string): Promise<AnswerResponse> {
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+    }
+    if (sessionId) {
+      headers['X-Session-Id'] = sessionId
+    }
+
     const response = await fetch(`${API_BASE_URL}/quiz/check-answer`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers,
       body: JSON.stringify(answerRequest),
     })
 

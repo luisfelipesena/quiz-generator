@@ -2,8 +2,9 @@
 Quiz API endpoints - Route handlers for quiz operations
 """
 
-from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
+from fastapi import APIRouter, Depends, File, HTTPException, UploadFile, Header
 from fastapi.responses import StreamingResponse
+from typing import Optional
 from src.pdf.services import PdfProcessingService
 from src.quiz.dto import (
     AnswerRequest,
@@ -26,6 +27,7 @@ quiz_router = APIRouter(prefix="/quiz", tags=["Quiz"])
 @quiz_router.post("/upload-pdf", response_model=QuizResponse)
 async def upload_pdf_and_generate_quiz(
     file: UploadFile = File(...),
+    x_session_id: Optional[str] = Header(default="default"),
     quiz_generation_service: QuizGenerationService = Depends(
         get_quiz_generation_service
     ),
@@ -56,8 +58,8 @@ async def upload_pdf_and_generate_quiz(
             pdf_result.text_extracted
         )
 
-        # Store questions for later reference
-        quiz_management_service.store_questions(questions)
+        # Store questions for later reference with session ID
+        quiz_management_service.store_questions(questions, x_session_id or "default")
 
         return QuizResponse(questions=questions)
 
@@ -74,6 +76,7 @@ async def upload_pdf_and_generate_quiz(
 async def update_question(
     question_id: str,
     question_update: QuestionUpdateRequest,
+    x_session_id: Optional[str] = Header(default="default"),
     quiz_management_service: QuizManagementService = Depends(
         get_quiz_management_service
     ),
@@ -100,7 +103,7 @@ async def update_question(
                 detail="Question ID in URL must match ID in request body",
             )
 
-        updated_question = quiz_management_service.update_question(question_update)
+        updated_question = quiz_management_service.update_question(question_update, x_session_id or "default")
         return updated_question
 
     except HTTPException:
@@ -115,6 +118,7 @@ async def update_question(
 @quiz_router.post("/check-answer", response_model=AnswerResponse)
 async def check_answer(
     answer_request: AnswerRequest,
+    x_session_id: Optional[str] = Header(default="default"),
     quiz_management_service: QuizManagementService = Depends(
         get_quiz_management_service
     ),
@@ -133,7 +137,7 @@ async def check_answer(
         HTTPException: If question not found or answer checking fails
     """
     try:
-        result = quiz_management_service.check_answer(answer_request)
+        result = quiz_management_service.check_answer(answer_request, x_session_id or "default")
         return result
 
     except HTTPException:
@@ -148,6 +152,7 @@ async def check_answer(
 @quiz_router.post("/check-answer-stream")
 async def check_answer_stream(
     answer_request: AnswerRequest,
+    x_session_id: Optional[str] = Header(default="default"),
     quiz_management_service: QuizManagementService = Depends(
         get_quiz_management_service
     ),
@@ -167,7 +172,7 @@ async def check_answer_stream(
     """
     try:
         async def generate_feedback():
-            async for chunk in quiz_management_service.get_streaming_feedback(answer_request):
+            async for chunk in quiz_management_service.get_streaming_feedback(answer_request, x_session_id or "default"):
                 yield chunk
         
         return StreamingResponse(

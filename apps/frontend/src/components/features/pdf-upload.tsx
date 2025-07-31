@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react'
 import { AlertCircle, Loader2, CheckCircle2 } from 'lucide-react'
+import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { UnstuckIcon, DropPdfIcon } from '@/components/icons'
 import { 
@@ -33,6 +34,8 @@ export function PdfUpload() {
 
   const handleFileReject = (file: File, message: string) => {
     console.error('File rejected:', file.name, message)
+    // Show toast notification for file rejection
+    toast.error(`File rejected: ${message}`)
   }
 
 
