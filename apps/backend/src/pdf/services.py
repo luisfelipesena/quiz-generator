@@ -2,8 +2,6 @@
 PDF services - Business logic for PDF processing
 """
 import io
-import os
-import tempfile
 from typing import Optional
 
 import PyPDF2

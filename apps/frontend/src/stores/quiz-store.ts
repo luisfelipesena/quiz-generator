@@ -16,6 +16,9 @@ interface QuizState {
   // Current step in the quiz flow
   currentStep: QuizStep
   
+  // User information
+  userName: string
+  
   // Questions and editing
   questions: QuestionAnswer[]
   editedQuestions: Record<string, QuestionAnswer>
@@ -29,6 +32,7 @@ interface QuizState {
 interface QuizActions {
   // Actions
   setCurrentStep: (step: QuizStep) => void
+  setUserName: (name: string) => void
   setQuestions: (questions: QuestionAnswer[]) => void
   updateQuestion: (questionId: string, questionUpdate: QuestionUpdateRequest) => void
   
@@ -50,6 +54,7 @@ export const useQuizStore = create<QuizState & QuizActions>()(
       (set, get) => ({
       // Initial state
       currentStep: 'upload',
+      userName: '',
       questions: [],
       editedQuestions: {},
       currentQuestionIndex: 0,
@@ -58,6 +63,7 @@ export const useQuizStore = create<QuizState & QuizActions>()(
 
       // Actions
       setCurrentStep: (step) => set({ currentStep: step }),
+      setUserName: (name) => set({ userName: name }),
       
       setQuestions: (questions) => set({ 
         questions,
@@ -117,6 +123,7 @@ export const useQuizStore = create<QuizState & QuizActions>()(
       resetQuiz: () =>
         set({
           currentStep: 'upload',
+          userName: '',
           questions: [],
           editedQuestions: {},
           currentQuestionIndex: 0,
@@ -153,6 +160,7 @@ export const useQuizStore = create<QuizState & QuizActions>()(
         partialize: (state) => ({
           editedQuestions: state.editedQuestions,
           questions: state.questions,
+          userName: state.userName,
         }),
       }
     ),

@@ -29,8 +29,10 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <QueryProvider>
-          <main className="min-h-screen bg-background py-8 px-4">
-            {children}
+          <main className="min-h-screen bg-white py-12 px-4 sm:px-6 lg:px-8">
+            <div className="max-w-7xl mx-auto">
+              {children}
+            </div>
           </main>
         </QueryProvider>
       </body>

@@ -2,9 +2,7 @@
 
 import { useState } from 'react'
 import { Check, X, ArrowRight } from 'lucide-react'
-import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Progress } from '@/components/ui/progress'
 import { useQuizAnswer } from '@/hooks/useQuizMutations'
 import { useQuizStore } from '@/stores/quiz-store'
 
@@ -13,7 +11,6 @@ export function Quiz() {
   const [hasAnswered, setHasAnswered] = useState(false)
   
   const {
-    questions,
     currentQuestionIndex,
     showFeedback,
     getCurrentQuestion,
@@ -22,7 +19,7 @@ export function Quiz() {
   } = useQuizStore()
 
   const currentQuestion = getCurrentQuestion()
-  const { checkAnswer, isLoading, error, reset } = useQuizAnswer()
+  const { checkAnswer, isLoading, reset } = useQuizAnswer()
 
   const handleAnswerSelect = (answer: string) => {
     if (!showFeedback && !isLoading) {
@@ -56,37 +53,52 @@ export function Quiz() {
     )
   }
 
-  const progress = ((currentQuestionIndex + 1) / questions.length) * 100
   const isCorrect = showFeedback && selectedAnswer === currentQuestion.answer
 
   return (
-    <div className="max-w-3xl mx-auto space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
-      <div className="space-y-2 p-4 bg-card/50 backdrop-blur-sm rounded-lg border">
-        <div className="flex justify-between items-center">
-          <div>
-            <h1 className="text-2xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
-              Quiz Time!
-            </h1>
-            <h2 className="text-sm font-medium text-muted-foreground">
-              Question {currentQuestionIndex + 1} of {questions.length}
-            </h2>
-          </div>
-          <div className="text-right">
-            <span className="text-sm font-medium text-muted-foreground">
-              {Math.round(progress)}% Complete
-            </span>
-          </div>
+    <div className="max-w-2xl mx-auto space-y-8">
+      <div className="flex items-center gap-3">
+        <button
+          onClick={() => useQuizStore.getState().setCurrentStep('edit')}
+          className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+        >
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12.5 15L7.5 10L12.5 5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+        </button>
+        <div className="flex items-center gap-3">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="2" y="2" width="5" height="5" rx="1" fill="#8B5CF6"/>
+            <rect x="9" y="2" width="5" height="5" rx="1" fill="#E5E7EB"/>
+            <rect x="2" y="9" width="5" height="5" rx="1" fill="#E5E7EB"/>
+            <rect x="9" y="9" width="5" height="5" rx="1" fill="#E5E7EB"/>
+          </svg>
+          <h1 className="text-xl font-semibold text-gray-900">Mathematics Quiz</h1>
         </div>
-        <Progress value={progress} className="h-3" />
+        <div className="ml-auto">
+          <Button
+            variant="outline"
+            size="sm"
+            className="flex items-center gap-2"
+          >
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M5 2V6M11 2V6M3 8H13M4 4H12C12.5523 4 13 4.44772 13 5V12C13 12.5523 12.5523 13 12 13H4C3.44772 13 3 12.5523 3 12V5C3 4.44772 3.44772 4 4 4Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+            Upgrade
+          </Button>
+        </div>
       </div>
 
-      <Card className="p-8 transition-all duration-300 hover:shadow-lg">
+      <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-8">
         <div className="space-y-6">
-          <h1 className="text-2xl font-semibold leading-relaxed animate-in fade-in slide-in-from-bottom-2 duration-500">
-            {currentQuestion.question}
-          </h1>
+          <div className="space-y-2">
+            <p className="text-sm text-gray-500">Question {currentQuestionIndex + 1}</p>
+            <h2 className="text-xl font-medium text-gray-900">
+              {currentQuestion.question}
+            </h2>
+          </div>
 
-          <div className="space-y-4">
+          <div className="space-y-3">
             {currentQuestion.options?.map((option, index) => {
               const isSelected = selectedAnswer === option
               const isCorrectOption = showFeedback && option === currentQuestion.answer
@@ -97,30 +109,30 @@ export function Quiz() {
                   key={index}
                   onClick={() => handleAnswerSelect(option)}
                   disabled={showFeedback || isLoading}
-                  className={`w-full p-5 text-left rounded-lg border-2 transition-all duration-300 transform hover:scale-[1.02] animate-in fade-in slide-in-from-bottom-2 ${
+                  className={`w-full p-4 text-left rounded-lg border transition-all duration-200 ${
                     isSelected
                       ? showFeedback
                         ? isCorrectOption
-                          ? 'border-green-500 bg-green-50 text-green-900 shadow-green-100 shadow-lg'
-                          : 'border-red-500 bg-red-50 text-red-900 shadow-red-100 shadow-lg'
-                        : 'border-primary bg-primary/5 shadow-primary/20 shadow-lg'
+                          ? 'border-green-500 bg-green-50'
+                          : 'border-red-500 bg-red-50'
+                        : 'border-primary bg-primary/5'
                       : showFeedback && isCorrectOption
-                      ? 'border-green-500 bg-green-50 text-green-900 shadow-green-100 shadow-lg'
-                      : 'border-border hover:border-muted-foreground/50 hover:bg-accent/50'
+                      ? 'border-green-500 bg-green-50'
+                      : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
                   } ${
                     showFeedback || isLoading
                       ? 'cursor-default'
                       : 'cursor-pointer'
                   }`}
-                  style={{ animationDelay: `${index * 100}ms` }}
                 >
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-3">
-                      <span className="font-medium text-muted-foreground min-w-[20px]">
-                        {String.fromCharCode(65 + index)}.
-                      </span>
-                      <span>{option}</span>
-                    </div>
+                    <span className={`text-base ${
+                      isCorrectOption ? 'text-green-700' : 
+                      isWrongSelection ? 'text-red-700' : 
+                      isSelected ? 'text-primary' : 'text-gray-700'
+                    }`}>
+                      {option}
+                    </span>
                     {showFeedback && (
                       <>
                         {isCorrectOption && <Check className="w-5 h-5 text-green-600" />}
@@ -134,49 +146,48 @@ export function Quiz() {
           </div>
 
           {showFeedback && (
-            <div className={`p-4 rounded-lg ${
-              isCorrect ? 'bg-green-50 border border-green-200' : 'bg-red-50 border border-red-200'
+            <div className={`p-4 rounded-lg text-center ${
+              isCorrect ? 'bg-green-50' : 'bg-white'
             }`}>
-              <div className="flex items-start space-x-2">
-                {isCorrect ? (
-                  <Check className="w-5 h-5 text-green-600 mt-0.5" />
-                ) : (
-                  <X className="w-5 h-5 text-red-600 mt-0.5" />
-                )}
-                <div>
-                  <p className={`font-medium ${
-                    isCorrect ? 'text-green-900' : 'text-red-900'
-                  }`}>
-                    {isCorrect ? 'Correct!' : 'Incorrect'}
-                  </p>
-                  {!isCorrect && (
-                    <p className="text-sm text-red-800 mt-1">
-                      The correct answer is: <strong>{currentQuestion.answer}</strong>
-                    </p>
-                  )}
+              {isCorrect ? (
+                <div className="space-y-2">
+                  <Check className="w-12 h-12 text-green-600 mx-auto" />
+                  <p className="text-lg font-medium text-green-700">Correct!</p>
                 </div>
-              </div>
+              ) : (
+                <div className="text-left">
+                  <p className="text-sm text-gray-600">
+                    The correct answer is: <span className="font-medium text-gray-900">{currentQuestion.answer}</span>
+                  </p>
+                </div>
+              )}
             </div>
           )}
 
-          <div className="flex justify-between">
-            <div />
+          <div className="flex justify-between items-center pt-2">
+            <button
+              onClick={() => useQuizStore.getState().setCurrentStep('edit')}
+              className="text-sm text-gray-600 hover:text-gray-900 transition-colors"
+            >
+              ← Previous
+            </button>
             {!showFeedback ? (
               <Button
                 onClick={handleSubmitAnswer}
                 disabled={!selectedAnswer || isLoading}
+                className="px-6"
               >
                 {isLoading ? 'Checking...' : 'Submit Answer'}
               </Button>
             ) : (
-              <Button onClick={handleNextQuestion}>
-                {isQuizComplete() ? 'View Results' : 'Next Question'}
-                <ArrowRight className="w-4 h-4 ml-2" />
+              <Button onClick={handleNextQuestion} className="px-6">
+                {isQuizComplete() ? 'View Results' : 'Next'}
+                <ArrowRight className="w-4 h-4 ml-1" />
               </Button>
             )}
           </div>
         </div>
-      </Card>
+      </div>
     </div>
   )
 }

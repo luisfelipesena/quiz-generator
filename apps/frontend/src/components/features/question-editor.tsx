@@ -1,8 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Edit3, Save, X } from 'lucide-react'
-import { Card } from '@/components/ui/card'
+import { Edit3, Check } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
@@ -45,38 +44,17 @@ export function QuestionEditor({ question, index }: QuestionEditorProps) {
     })
   }
 
-  return (
-    <Card className="p-6">
-      <div className="flex justify-between items-start mb-4">
-        <h3 className="text-lg font-semibold">Question {index + 1}</h3>
-        <div className="flex space-x-2">
-          {isEditing ? (
-            <>
-              <Button size="sm" onClick={handleSave}>
-                <Save className="w-4 h-4 mr-1" />
-                Save
-              </Button>
-              <Button size="sm" variant="outline" onClick={handleCancel}>
-                <X className="w-4 h-4 mr-1" />
-                Cancel
-              </Button>
-            </>
-          ) : (
-            <Button size="sm" variant="outline" onClick={() => setIsEditing(true)}>
-              <Edit3 className="w-4 h-4 mr-1" />
-              Edit
-            </Button>
-          )}
-        </div>
-      </div>
+  const isCorrectAnswer = (option: string) => option === editedQuestion.answer
 
+  return (
+    <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
       <div className="space-y-4">
-        {isEditing ? (
-          <>
-            <div>
-              <Label htmlFor={`question-${question.id}`}>Question</Label>
+
+        <div className="flex items-start justify-between">
+          <div className="flex-1">
+            <h3 className="text-sm font-medium text-gray-900">Question {index + 1}</h3>
+            {isEditing ? (
               <Textarea
-                id={`question-${question.id}`}
                 value={editedQuestion.question}
                 onChange={(e) =>
                   setEditedQuestion({
@@ -84,15 +62,58 @@ export function QuestionEditor({ question, index }: QuestionEditorProps) {
                     question: e.target.value,
                   })
                 }
-                className="mt-1"
-                rows={3}
+                className="mt-2 w-full resize-none border-gray-300 rounded-lg"
+                rows={2}
               />
-            </div>
+            ) : (
+              <p className="mt-2 text-base text-gray-700">{question.question}</p>
+            )}
+          </div>
+        </div>
 
-            <div>
-              <Label htmlFor={`answer-${question.id}`}>Correct Answer</Label>
+        <div className="space-y-2">
+          <h4 className="text-sm font-medium text-gray-600">Multichoice Answers</h4>
+          {editedQuestion.options && editedQuestion.options.length > 0 && (
+            <div className="space-y-2">
+              {editedQuestion.options.map((option, optionIndex) => (
+                <div key={optionIndex} className="flex items-center gap-3">
+                  <span className="text-sm text-gray-500 min-w-[60px]">
+                    Option {optionIndex + 1}:
+                  </span>
+                  {isEditing ? (
+                    <div className="flex-1 flex items-center gap-2">
+                      <Input
+                        value={option}
+                        onChange={(e) => updateOption(optionIndex, e.target.value)}
+                        className="flex-1 h-10 border-gray-300 rounded-lg"
+                      />
+                      {isCorrectAnswer(option) && (
+                        <Check className="w-5 h-5 text-green-600 flex-shrink-0" />
+                      )}
+                    </div>
+                  ) : (
+                    <div className="flex-1 flex items-center gap-2">
+                      <div className={`flex-1 h-10 px-3 flex items-center rounded-lg border ${isCorrectAnswer(option) ? 'border-green-500 bg-green-50' : 'border-gray-300 bg-gray-50'}`}>
+                        <span className={`text-sm ${isCorrectAnswer(option) ? 'text-green-700 font-medium' : 'text-gray-700'}`}>
+                          {option}
+                        </span>
+                      </div>
+                      {isCorrectAnswer(option) && (
+                        <div className="flex items-center gap-1 text-green-600">
+                          <Check className="w-5 h-5" />
+                          <span className="text-xs font-medium">Correct Answer</span>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+          {isEditing && (
+            <div className="mt-4 pt-4 border-t border-gray-200">
+              <Label className="text-sm font-medium text-gray-600">Correct Answer</Label>
               <Input
-                id={`answer-${question.id}`}
                 value={editedQuestion.answer}
                 onChange={(e) =>
                   setEditedQuestion({
@@ -100,59 +121,37 @@ export function QuestionEditor({ question, index }: QuestionEditorProps) {
                     answer: e.target.value,
                   })
                 }
-                className="mt-1"
+                className="mt-1 border-gray-300 rounded-lg"
+                placeholder="Enter the correct answer"
               />
             </div>
+          )}
+        </div>
 
-            {editedQuestion.options && editedQuestion.options.length > 0 && (
-              <div>
-                <Label>Answer Options</Label>
-                <div className="space-y-2 mt-2">
-                  {editedQuestion.options.map((option, optionIndex) => (
-                    <Input
-                      key={optionIndex}
-                      value={option}
-                      onChange={(e) => updateOption(optionIndex, e.target.value)}
-                      placeholder={`Option ${String.fromCharCode(65 + optionIndex)}`}
-                    />
-                  ))}
-                </div>
-              </div>
-            )}
-          </>
+        {isEditing ? (
+          <div className="flex justify-end gap-2 pt-4">
+            <Button variant="outline" size="sm" onClick={handleCancel}>
+              Cancel
+            </Button>
+            <Button size="sm" onClick={handleSave}>
+              Save Changes
+            </Button>
+          </div>
         ) : (
-          <>
-            <div>
-              <Label className="text-sm font-medium text-muted-foreground">Question</Label>
-              <p className="mt-1 text-foreground">{question.question}</p>
-            </div>
-
-            <div>
-              <Label className="text-sm font-medium text-muted-foreground">Correct Answer</Label>
-              <p className="mt-1 text-foreground font-medium">{question.answer}</p>
-            </div>
-
-            {question.options && question.options.length > 0 && (
-              <div>
-                <Label className="text-sm font-medium text-muted-foreground">Answer Options</Label>
-                <div className="mt-2 space-y-1">
-                  {question.options.map((option, optionIndex) => (
-                    <div key={optionIndex} className="flex items-center space-x-2">
-                      <span className="text-sm font-medium text-muted-foreground min-w-[20px]">
-                        {String.fromCharCode(65 + optionIndex)}.
-                      </span>
-                      <span className={`text-sm ${option === question.answer ? 'font-medium text-primary' : ''}`}>
-                        {option}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-          </>
+          <div className="flex justify-end pt-2">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setIsEditing(true)}
+              className="text-gray-600 hover:text-gray-900"
+            >
+              <Edit3 className="w-4 h-4 mr-1" />
+              Edit
+            </Button>
+          </div>
         )}
       </div>
-    </Card>
+    </div>
   )
 }
 
@@ -163,38 +162,56 @@ export function QuestionEditList() {
     setCurrentStep('quiz')
   }
 
+  const handleBack = () => {
+    setCurrentStep('upload')
+  }
+
   return (
-    <div className="max-w-4xl mx-auto space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
-      <div className="text-center space-y-2">
-        <h1 className="text-4xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
-          Review & Edit Questions
-        </h1>
-        <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-          Review the generated questions and make any necessary edits before starting the quiz. 
-          Your changes are automatically saved.
-        </p>
+    <div className="max-w-3xl mx-auto space-y-8">
+      <button
+        onClick={handleBack}
+        className="flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors"
+      >
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12.5 15L7.5 10L12.5 5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+        </svg>
+        <span className="text-sm font-medium">Back</span>
+      </button>
+
+      <div className="space-y-4">
+        <div className="flex items-center gap-3">
+          <svg
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+            className="text-primary"
+          >
+            <path
+              d="M12 2L13.09 8.26L19 7L13.18 8.09L19 12L13.09 10.74L12 17L10.91 10.74L5 12L10.82 10.91L5 7L10.91 8.26L12 2Z"
+              fill="currentColor"
+            />
+          </svg>
+          <h1 className="text-2xl font-semibold text-gray-900">
+            Review & Edit Questions
+          </h1>
+        </div>
       </div>
 
-      <div className="space-y-6">
+      <div className="space-y-4">
         {questions.map((question, index) => (
-          <div 
-            key={question.id} 
-            className="animate-in fade-in slide-in-from-bottom-2 duration-500"
-            style={{ animationDelay: `${index * 100}ms` }}
-          >
-            <QuestionEditor question={question} index={index} />
-          </div>
+          <QuestionEditor key={question.id} question={question} index={index} />
         ))}
       </div>
 
-      <div className="flex justify-center animate-in fade-in slide-in-from-bottom-2 duration-500" style={{ animationDelay: `${questions.length * 100}ms` }}>
+      <div className="flex justify-center pt-4">
         <Button 
           onClick={handleStartQuiz} 
           size="lg" 
-          className="px-12 py-4 text-lg relative overflow-hidden group transition-all duration-300 hover:scale-105"
+          className="px-8 py-3 text-base font-medium rounded-lg"
         >
-          <span className="relative z-10">Start Quiz</span>
-          <div className="absolute inset-0 bg-gradient-to-r from-primary/0 via-white/20 to-primary/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
+          Start Quiz
         </Button>
       </div>
     </div>

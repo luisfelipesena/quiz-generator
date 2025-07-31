@@ -1,136 +1,131 @@
 'use client'
 
-import { Check, X, RotateCcw } from 'lucide-react'
-import { Card } from '@/components/ui/card'
+import { useState, useEffect } from 'react'
+import { Check, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { Progress } from '@/components/ui/progress'
+import { UserNameModal } from '@/components/features/user-name-modal'
 import { useQuizStore } from '@/stores/quiz-store'
 
 export function QuizResults() {
-  const { questions, answers, getScore, resetQuiz } = useQuizStore()
-  const { correct, total, percentage } = getScore()
+  const { questions, answers, getScore, resetQuiz, userName } = useQuizStore()
+  const { correct, total } = getScore()
+  const [showNameModal, setShowNameModal] = useState(false)
 
-  const getScoreColor = (percentage: number) => {
-    if (percentage >= 80) return 'text-green-600'
-    if (percentage >= 60) return 'text-yellow-600'
-    return 'text-red-600'
+  // Show name modal if user name is not set
+  useEffect(() => {
+    if (!userName.trim()) {
+      setShowNameModal(true)
+    }
+  }, [userName])
+
+  const handleNameModalSuccess = () => {
+    setShowNameModal(false)
   }
 
-  const getScoreMessage = (percentage: number) => {
-    if (percentage >= 90) return 'Excellent work! 🎉'
-    if (percentage >= 80) return 'Great job! 👏'
-    if (percentage >= 70) return 'Good effort! 👍'
-    if (percentage >= 60) return 'Not bad, but you can do better! 💪'
-    return 'Keep studying and try again! 📚'
+  const getFirstName = () => {
+    return userName.split(' ')[0] || userName
   }
+
+
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
-      <div className="text-center space-y-2">
-        <h1 className="text-4xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent animate-in fade-in zoom-in duration-1000">
-          🎉 Quiz Complete! 🎉
-        </h1>
-        <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-          Here are your results and a breakdown of each question
-        </p>
-      </div>
+    <>
+      {/* Name Input Modal with React Hook Form + Zod */}
+      <UserNameModal 
+        isOpen={showNameModal} 
+        onSuccess={handleNameModalSuccess}
+      />
 
-      {/* Score Summary */}
-      <Card className="p-8 text-center transition-all duration-500 hover:shadow-xl animate-in fade-in zoom-in duration-700" style={{ animationDelay: '200ms' }}>
-        <div className="space-y-6">
-          <div className={`text-8xl font-bold transition-all duration-1000 animate-in zoom-in ${getScoreColor(percentage)}`} style={{ animationDelay: '400ms' }}>
-            {percentage}%
+      <div className="max-w-3xl mx-auto space-y-8">
+        {/* Results Header */}
+        <div className="text-center space-y-6">
+          <div className="inline-flex items-center justify-center w-24 h-24 bg-green-100 rounded-full">
+            <Check className="w-12 h-12 text-green-600" />
           </div>
-          <div className="space-y-3 animate-in fade-in slide-in-from-bottom-2 duration-700" style={{ animationDelay: '600ms' }}>
-            <p className="text-2xl font-semibold">{getScoreMessage(percentage)}</p>
-            <p className="text-lg text-muted-foreground">
-              You got <span className="font-bold text-primary">{correct}</span> out of <span className="font-bold">{total}</span> questions correct
-            </p>
-          </div>
-          <div className="animate-in fade-in slide-in-from-bottom-2 duration-700" style={{ animationDelay: '800ms' }}>
-            <Progress value={percentage} className="h-4 max-w-md mx-auto" />
+          <div className="space-y-2">
+            <h1 className="text-3xl font-semibold text-gray-900">
+              Great Work {getFirstName()}, you did very good on your quiz.
+            </h1>
+            <div className="text-5xl font-bold text-gray-900 mt-4">
+              {correct}/{total}
+            </div>
+            <div className="flex items-center justify-center gap-4 mt-4">
+              <div className="flex items-center gap-2">
+                <div className="w-3 h-3 bg-green-500 rounded-full" />
+                <span className="text-sm text-gray-600">Answered Correctly</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-3 h-3 bg-red-500 rounded-full" />
+                <span className="text-sm text-gray-600">Missed Answers</span>
+              </div>
+            </div>
+            <div className="relative w-full max-w-md mx-auto h-3 bg-gray-200 rounded-full overflow-hidden mt-4">
+              <div
+                className="absolute left-0 top-0 h-full bg-green-500 transition-all duration-1000"
+                style={{ width: `${(correct / total) * 100}%` }}
+              />
+              <div
+                className="absolute right-0 top-0 h-full bg-red-500 transition-all duration-1000"
+                style={{ width: `${((total - correct) / total) * 100}%` }}
+              />
+            </div>
           </div>
         </div>
-      </Card>
 
-      {/* Question Breakdown */}
-      <div className="space-y-4">
-        <h2 className="text-xl font-semibold">Question Breakdown</h2>
-        {questions.map((question, index) => {
-          const answer = answers.find(a => a.questionId === question.id)
-          if (!answer) return null
+        {/* Action Button */}
+        <div className="text-center">
+          <Button 
+            onClick={resetQuiz} 
+            size="lg"
+            className="px-8 py-3 text-base font-medium rounded-lg"
+          >
+            Share results →
+          </Button>
+        </div>
 
-          return (
-            <Card key={question.id} className="p-6">
-              <div className="space-y-4">
-                <div className="flex items-start justify-between">
-                  <h3 className="font-semibold text-lg">Question {index + 1}</h3>
-                  <div className="flex items-center space-x-2">
-                    {answer.isCorrect ? (
-                      <div className="flex items-center space-x-1 text-green-600">
-                        <Check className="w-5 h-5" />
-                        <span className="font-medium">Correct</span>
-                      </div>
-                    ) : (
-                      <div className="flex items-center space-x-1 text-red-600">
-                        <X className="w-5 h-5" />
-                        <span className="font-medium">Incorrect</span>
-                      </div>
+        {/* Result Summary */}
+        <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
+          <h2 className="text-lg font-semibold text-gray-900 mb-4">Result Summary</h2>
+          <div className="space-y-3">
+            {questions.map((question, index) => {
+              const answer = answers.find(a => a.questionId === question.id)
+              if (!answer) return null
+
+              return (
+                <details key={question.id} className="group">
+                  <summary className="flex items-center justify-between cursor-pointer p-3 rounded-lg hover:bg-gray-50 transition-colors">
+                    <div className="flex items-center gap-3">
+                      <span className="text-sm font-medium text-gray-600">Question {index + 1}</span>
+                      {answer.isCorrect ? (
+                        <div className="flex items-center gap-1 text-green-600">
+                          <Check className="w-4 h-4" />
+                          <span className="text-sm">Correct Answer</span>
+                        </div>
+                      ) : (
+                        <div className="flex items-center gap-1 text-red-600">
+                          <X className="w-4 h-4" />
+                          <span className="text-sm">Wrong Answer</span>
+                        </div>
+                      )}
+                    </div>
+                    <svg className="w-4 h-4 text-gray-400 group-open:rotate-180 transition-transform" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M4 6L8 10L12 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                  </summary>
+                  <div className="mt-3 px-3 pb-3 space-y-3">
+                    <p className="text-sm text-gray-700">{question.question}</p>
+                    {!answer.isCorrect && (
+                      <p className="text-sm text-gray-600">
+                        Correct answer: <span className="font-medium text-gray-900">{answer.correctAnswer}</span>
+                      </p>
                     )}
                   </div>
-                </div>
-
-                <p className="text-foreground">{question.question}</p>
-
-                <div className="grid gap-3">
-                  <div className="space-y-1">
-                    <p className="text-sm font-medium text-muted-foreground">Your answer:</p>
-                    <p className={`p-2 rounded ${
-                      answer.isCorrect 
-                        ? 'bg-green-50 text-green-900 border border-green-200' 
-                        : 'bg-red-50 text-red-900 border border-red-200'
-                    }`}>
-                      {answer.userAnswer}
-                    </p>
-                  </div>
-
-                  {!answer.isCorrect && (
-                    <div className="space-y-1">
-                      <p className="text-sm font-medium text-muted-foreground">Correct answer:</p>
-                      <p className="p-2 rounded bg-green-50 text-green-900 border border-green-200">
-                        {answer.correctAnswer}
-                      </p>
-                    </div>
-                  )}
-
-                  {answer.explanation && (
-                    <div className="space-y-1">
-                      <p className="text-sm font-medium text-muted-foreground">Explanation:</p>
-                      <p className="p-2 rounded bg-blue-50 text-blue-900 border border-blue-200">
-                        {answer.explanation}
-                      </p>
-                    </div>
-                  )}
-                </div>
-              </div>
-            </Card>
-          )
-        })}
+                </details>
+              )
+            })}
+          </div>
+        </div>
       </div>
-
-      {/* Actions */}
-      <div className="flex justify-center space-x-4 animate-in fade-in slide-in-from-bottom-2 duration-700" style={{ animationDelay: '1000ms' }}>
-        <Button 
-          onClick={resetQuiz} 
-          variant="outline" 
-          size="lg"
-          className="px-8 py-4 text-lg relative overflow-hidden group transition-all duration-300 hover:scale-105"
-        >
-          <RotateCcw className="w-5 h-5 mr-2 transition-transform group-hover:rotate-180 duration-300" />
-          <span className="relative z-10">Take Another Quiz</span>
-          <div className="absolute inset-0 bg-gradient-to-r from-primary/0 via-primary/10 to-primary/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
-        </Button>
-      </div>
-    </div>
+    </>
   )
 }
