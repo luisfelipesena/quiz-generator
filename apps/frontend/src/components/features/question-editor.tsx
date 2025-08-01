@@ -162,7 +162,7 @@ export function QuestionEditor({ question, index }: QuestionEditorProps) {
               />
               {editedQuestion.options && !editedQuestion.options.includes(editedQuestion.answer) && (
                 <p className="text-xs text-amber-600 mt-1">
-                  ⚠️ This answer doesn't match any of the options above. The first option will be updated automatically when saved.
+                  ⚠️ This answer doesn&apos;t match any of the options above. The first option will be updated automatically when saved.
                 </p>
               )}
             </div>
