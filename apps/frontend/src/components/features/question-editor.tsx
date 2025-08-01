@@ -43,14 +43,40 @@ export function QuestionEditor({ question, index }: QuestionEditorProps) {
 
   const updateOption = (optionIndex: number, value: string) => {
     const newOptions = [...(editedQuestion.options || [])]
+    const oldValue = newOptions[optionIndex]
     newOptions[optionIndex] = value
-    setEditedQuestion({
+    
+    // If this option was the correct answer, update the answer field too
+    const updatedState = {
       ...editedQuestion,
       options: newOptions,
-    })
+    }
+    
+    if (editedQuestion.answer === oldValue) {
+      updatedState.answer = value
+    }
+    
+    setEditedQuestion(updatedState)
   }
 
   const isCorrectAnswer = (option: string) => option === editedQuestion.answer
+
+  const setCorrectAnswer = (answer: string) => {
+    setEditedQuestion({
+      ...editedQuestion,
+      answer,
+    })
+  }
+
+  const handleAnswerChange = (newAnswer: string) => {
+    // If the new answer matches one of the options, use it directly
+    if (editedQuestion.options?.includes(newAnswer)) {
+      setCorrectAnswer(newAnswer)
+    } else {
+      // If it doesn't match any option, still update it (backend will handle validation)
+      setCorrectAnswer(newAnswer)
+    }
+  }
 
   return (
     <div className="bg-white p-4 sm:p-6 rounded-xl border border-gray-200 shadow-sm">
@@ -93,12 +119,18 @@ export function QuestionEditor({ question, index }: QuestionEditorProps) {
                         onChange={(e) => updateOption(optionIndex, e.target.value)}
                         className={`flex-1 h-10 rounded-lg ${isCorrectAnswer(option) ? 'border-green-500 bg-green-50' : 'border-gray-300'}`}
                       />
-                      {isCorrectAnswer(option) && (
-                        <div className="flex items-center gap-1 text-green-600">
-                          <Check className="w-5 h-5" />
-                          <span className="text-xs font-medium">Correct Answer</span>
-                        </div>
-                      )}
+                      <button
+                        type="button"
+                        onClick={() => setCorrectAnswer(option)}
+                        className={`flex items-center gap-1 px-2 py-1 rounded text-xs font-medium transition-colors ${
+                          isCorrectAnswer(option) 
+                            ? 'text-green-600 bg-green-100' 
+                            : 'text-gray-400 hover:text-green-600 hover:bg-green-50'
+                        }`}
+                      >
+                        <Check className="w-4 h-4" />
+                        {isCorrectAnswer(option) ? 'Correct' : 'Set as correct'}
+                      </button>
                     </div>
                   ) : (
                     <div className="w-full flex-1 flex items-center gap-2">
@@ -124,15 +156,15 @@ export function QuestionEditor({ question, index }: QuestionEditorProps) {
               <Label className="text-sm font-medium text-gray-600">Correct Answer</Label>
               <Input
                 value={editedQuestion.answer}
-                onChange={(e) =>
-                  setEditedQuestion({
-                    ...editedQuestion,
-                    answer: e.target.value,
-                  })
-                }
+                onChange={(e) => handleAnswerChange(e.target.value)}
                 className="mt-1 border-gray-300 rounded-lg"
                 placeholder="Enter the correct answer"
               />
+              {editedQuestion.options && !editedQuestion.options.includes(editedQuestion.answer) && (
+                <p className="text-xs text-amber-600 mt-1">
+                  ⚠️ This answer doesn't match any of the options above. The first option will be updated automatically when saved.
+                </p>
+              )}
             </div>
           )}
         </div>

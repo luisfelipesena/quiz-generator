@@ -258,15 +258,27 @@ class QuizManagementService:
         if question_update.id not in questions_dict:
             raise HTTPException(status_code=404, detail="Question not found")
 
-        # Validate that the correct answer is one of the options
-        if (
-            question_update.options
-            and question_update.answer not in question_update.options
-        ):
-            raise HTTPException(
-                status_code=400,
-                detail="Correct answer must be one of the multiple choice options",
-            )
+        # Validate that the correct answer is one of the options (with flexible matching)
+        if question_update.options and question_update.answer:
+            # Check for exact match first
+            if question_update.answer not in question_update.options:
+                # Check for case-insensitive match
+                matching_option = None
+                for option in question_update.options:
+                    if option.lower() == question_update.answer.lower():
+                        matching_option = option
+                        break
+                
+                if matching_option:
+                    # Update the answer to match the exact option text
+                    question_update.answer = matching_option
+                else:
+                    # If no match found, update the options to include the new answer
+                    # Replace the first option that's most similar or just add it
+                    question_update.options = [
+                        question_update.answer if i == 0 else opt 
+                        for i, opt in enumerate(question_update.options)
+                    ]
 
         updated_question = QuestionAnswer(
             id=question_update.id,
@@ -433,7 +445,7 @@ class QuizManagementService:
                             # Send all complete words
                             for i, part in enumerate(parts[:-1]):
                                 if i > 0:  # Add space before words (except first)
-                                    yield f"data:  \n\n"
+                                    yield "data:  \n\n"
                                 yield f"data: {part}\n\n"
                             # Keep the last incomplete part in buffer
                             word_buffer = parts[-1]
