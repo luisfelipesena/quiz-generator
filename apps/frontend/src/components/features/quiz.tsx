@@ -130,16 +130,16 @@ export function Quiz() {
         </div>
       </div>
 
-      <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-4 sm:p-8 max-h-[calc(100vh-12rem)] overflow-y-auto">
-        <div className="space-y-6">
+      <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-3 sm:p-8 max-h-[calc(100vh-12rem)] overflow-y-auto">
+        <div className="space-y-4 sm:space-y-6">
           <div className="space-y-2">
             <p className="text-sm text-gray-500">Question {currentQuestionIndex + 1}</p>
-            <h2 className="text-xl font-medium text-gray-900">
+            <h2 className="text-lg sm:text-xl font-medium text-gray-900 leading-tight">
               {currentQuestion.question}
             </h2>
           </div>
 
-          <div className="space-y-3">
+          <div className="space-y-2 sm:space-y-3">
             {currentQuestion.options?.map((option, index) => {
               const isSelected = selectedAnswer === option
               const isCorrectOption = showFeedback && option === currentQuestion.answer
@@ -150,7 +150,7 @@ export function Quiz() {
                   key={index}
                   onClick={() => handleAnswerSelect(option)}
                   disabled={showFeedback || isLoading}
-                  className={`w-full p-5 text-left rounded-xl border-2 transition-all duration-200 ${
+                  className={`w-full p-3 sm:p-5 text-left rounded-xl border-2 transition-all duration-200 ${
                     isSelected
                       ? showFeedback
                         ? isCorrectOption
@@ -166,8 +166,8 @@ export function Quiz() {
                       : 'cursor-pointer hover:shadow-sm'
                   }`}
                 >
-                  <div className="flex items-center gap-4">
-                    <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${
+                  <div className="flex items-start gap-3 sm:gap-4">
+                    <div className={`w-5 h-5 sm:w-6 sm:h-6 rounded-full border-2 flex items-center justify-center flex-shrink-0 mt-0.5 ${
                       isSelected
                         ? showFeedback
                           ? isCorrectOption
@@ -181,16 +181,16 @@ export function Quiz() {
                       {(isSelected || (showFeedback && isCorrectOption)) && (
                         showFeedback ? (
                           isCorrectOption ? (
-                            <Check className="w-3 h-3 text-white" />
+                            <Check className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-white" />
                           ) : isWrongSelection ? (
-                            <X className="w-3 h-3 text-white" />
+                            <X className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-white" />
                           ) : null
                         ) : (
-                          <div className="w-2 h-2 bg-white rounded-full" />
+                          <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-white rounded-full" />
                         )
                       )}
                     </div>
-                    <span className={`text-base font-medium ${
+                    <span className={`text-sm sm:text-base font-medium leading-relaxed ${
                       isCorrectOption ? 'text-green-700' : 
                       isWrongSelection ? 'text-red-700' : 
                       isSelected ? 'text-primary' : 'text-foreground'
@@ -260,7 +260,7 @@ export function Quiz() {
             </div>
           )}
 
-          <div className="flex justify-between items-center pt-2">
+          <div className="flex justify-between items-center pt-2 gap-3">
             <button
               onClick={() => {
                 if (currentQuestionIndex > 0) {
@@ -270,7 +270,7 @@ export function Quiz() {
                   router.push('/review')
                 }
               }}
-              className="text-sm text-gray-600 hover:text-gray-900 transition-colors"
+              className="text-sm text-gray-600 hover:text-gray-900 transition-colors flex-shrink-0"
             >
               ← Previous
             </button>
@@ -278,12 +278,12 @@ export function Quiz() {
               <Button
                 onClick={handleSubmitAnswer}
                 disabled={!selectedAnswer || isLoading}
-                className="px-6"
+                className="px-4 sm:px-6 text-sm sm:text-base"
               >
                 {isLoading ? 'Checking...' : 'Submit Answer'}
               </Button>
             ) : (
-              <Button onClick={handleNextQuestion} className="px-6">
+              <Button onClick={handleNextQuestion} className="px-4 sm:px-6 text-sm sm:text-base">
                 {isQuizComplete() ? 'View Results' : 'Next'}
                 <ArrowRight className="w-4 h-4 ml-1" />
               </Button>
