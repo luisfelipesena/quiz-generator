@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import { QueryProvider } from "@/providers/query-provider";
 import { Toaster } from "@/components/ui/sonner";
+import { ErrorBoundary } from "@/components/ui/error-boundary";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -25,12 +26,12 @@ export default function RootLayout({
         className={`${inter.variable} font-sans antialiased`}
       >
         <QueryProvider>
-          <main className="min-h-screen bg-background px-4 sm:px-6 lg:px-8">
-            <div className="w-full max-w-7xl mx-auto">
+          <ErrorBoundary>
+            <main className="min-h-screen bg-background">
               {children}
-            </div>
-          </main>
-          <Toaster />
+            </main>
+            <Toaster />
+          </ErrorBoundary>
         </QueryProvider>
       </body>
     </html>

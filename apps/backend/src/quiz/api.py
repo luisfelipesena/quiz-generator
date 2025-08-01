@@ -2,10 +2,10 @@
 Quiz API endpoints - Route handlers for quiz operations
 """
 
-from typing import List, Optional
+from typing import Optional
 
 from fastapi import APIRouter, Depends, File, Header, HTTPException, UploadFile
-from fastapi.responses import Response, StreamingResponse
+from fastapi.responses import StreamingResponse
 from src.pdf.services import PdfProcessingService
 from src.quiz.dto import (
     AnswerRequest,
@@ -24,57 +24,6 @@ from src.quiz.services import (
 # Create Quiz router
 quiz_router = APIRouter(prefix="/quiz", tags=["Quiz"])
 
-
-@quiz_router.options("/sync")
-async def sync_options():
-    """Handle preflight requests for sync endpoint"""
-    return Response(
-        status_code=200,
-        headers={
-            "Access-Control-Allow-Origin": "https://quiz-generator-frontend-psi.vercel.app",
-            "Access-Control-Allow-Methods": "POST, OPTIONS",
-            "Access-Control-Allow-Headers": "Content-Type, X-Session-ID, x-session-id, Quiz-Title",
-            "Access-Control-Allow-Credentials": "true",
-        }
-    )
-
-
-@quiz_router.options("/upload-pdf")
-async def upload_pdf_options():
-    """Handle preflight requests for upload-pdf endpoint"""
-    return Response(
-        status_code=200,
-        headers={
-            "Access-Control-Allow-Origin": "https://quiz-generator-frontend-psi.vercel.app",
-            "Access-Control-Allow-Methods": "POST, OPTIONS",
-            "Access-Control-Allow-Headers": "Content-Type, X-Session-ID, x-session-id",
-            "Access-Control-Allow-Credentials": "true",
-        }
-    )
-
-
-@quiz_router.post("/sync")
-async def sync_questions(
-    questions: List[QuestionAnswer],
-    x_session_id: Optional[str] = Header(default="default"),
-    quiz_title: Optional[str] = Header(default="Uploaded Quiz"),
-    quiz_management_service: QuizManagementService = Depends(
-        get_quiz_management_service
-    ),
-):
-    """
-    Sync questions from the client to the server's in-memory storage.
-    This is useful for re-populating state after a server restart.
-    """
-    try:
-        quiz_management_service.store_questions(
-            questions, x_session_id or "default", quiz_title or "Uploaded Quiz"
-        )
-        return {"message": "Questions synced successfully"}
-    except Exception as e:
-        raise HTTPException(
-            status_code=500, detail=f"Unexpected error syncing questions: {str(e)}"
-        )
 
 
 @quiz_router.post("/upload-pdf", response_model=QuizResponse)

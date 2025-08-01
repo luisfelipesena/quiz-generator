@@ -416,11 +416,35 @@ class QuizManagementService:
                 max_tokens=150,
             )
 
+            # Buffer to accumulate word fragments
+            word_buffer = ""
+            
             # Yield each chunk as Server-Sent Events format
             for chunk in stream:
                 if chunk.choices[0].delta.content is not None:
                     content = chunk.choices[0].delta.content
-                    yield f"data: {content}\n\n"
+                    word_buffer += content
+                    
+                    # Send complete words or chunks ending with punctuation
+                    if ' ' in word_buffer or any(p in word_buffer for p in '.!?,:;'):
+                        # Split on spaces but keep the space
+                        parts = word_buffer.split(' ')
+                        if len(parts) > 1:
+                            # Send all complete words
+                            for i, part in enumerate(parts[:-1]):
+                                if i > 0:  # Add space before words (except first)
+                                    yield f"data:  \n\n"
+                                yield f"data: {part}\n\n"
+                            # Keep the last incomplete part in buffer
+                            word_buffer = parts[-1]
+                        else:
+                            # Single word with punctuation - send it
+                            yield f"data: {word_buffer}\n\n"
+                            word_buffer = ""
+            
+            # Send any remaining content
+            if word_buffer.strip():
+                yield f"data: {word_buffer}\n\n"
 
             # Signal end of stream
             yield "data: [DONE]\n\n"

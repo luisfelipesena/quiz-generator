@@ -15,15 +15,28 @@ test.describe('Quiz Generator - Core Requirements', () => {
   });
 
   test('✅ Homepage loads with PDF upload area', async ({ page }) => {
-    // Requirement: Application loads successfully
-    await expect(page).toHaveTitle(/Quiz Generator/);
+    // Requirement: Application loads successfully - check for Unstuck title
+    await expect(page.getByRole('heading', { name: /Unstuck Quiz Generator/i })).toBeVisible();
     
-    // Check upload area exists
-    const uploadArea = page.locator('text=/Click to upload|drag and drop/i');
+    // Should show landing page with Get Started button
+    const getStartedButton = page.getByRole('button', { name: /Get Started/i });
+    await expect(getStartedButton).toBeVisible();
+    
+    // Click Get Started to go to upload page
+    await getStartedButton.click();
+    await page.waitForURL('/upload');
+    
+    // Check upload area exists in upload page
+    const uploadArea = page.locator('text=/Click to upload.*or drag and drop/i');
     await expect(uploadArea).toBeVisible();
   });
 
   test('✅ Complete quiz flow - PDF to Results', async ({ page }) => {
+    // STEP 0: Navigate to upload page first
+    const getStartedButton = page.getByRole('button', { name: /Get Started/i });
+    await getStartedButton.click();
+    await page.waitForURL('/upload');
+    
     // STEP 1: Upload PDF
     console.log('📄 Uploading PDF...');
     const fileInput = page.locator('input[type="file"]');
@@ -52,25 +65,15 @@ test.describe('Quiz Generator - Core Requirements', () => {
       }
     }
     
-    // Then wait for questions page
-    const questionPageSelectors = [
-      'h1:has-text("Review Generated Questions")',
-      'h2:has-text("Review Generated Questions")',
-      'text=/Review.*Questions/i',
-      'textarea' // Questions should have textareas
-    ];
+    // Wait for automatic navigation to review page after successful upload
+    await page.waitForURL('/review', { timeout: 30000 });
+    console.log('✅ Questions generated and navigated to review successfully!');
     
-    let questionsLoaded = false;
-    for (const selector of questionPageSelectors) {
-      try {
-        await page.waitForSelector(selector, { timeout: 30000 });
-        questionsLoaded = true;
-        console.log('✅ Questions page loaded');
-        break;
-      } catch (e) {
-        continue;
-      }
-    }
+    // Wait for questions to appear in review page
+    const questionContainer = page.locator('text=/Question/i').first();
+    await expect(questionContainer).toBeVisible({ timeout: 10000 });
+    
+    let questionsLoaded = true;
     
     expect(questionsLoaded).toBeTruthy();
     
@@ -89,24 +92,12 @@ test.describe('Quiz Generator - Core Requirements', () => {
     }
     
     // STEP 5: Start quiz
-    const startButtons = [
-      page.getByRole('button', { name: /Start Quiz/i }),
-      page.getByRole('button', { name: /Begin Quiz/i }),
-      page.getByText(/Start Quiz/i),
-      page.locator('button:has-text("Start")')
-    ];
+    const startQuizButton = page.getByRole('button', { name: /Start Quiz/i });
+    await startQuizButton.click();
+    console.log('✅ Quiz started');
     
-    let quizStarted = false;
-    for (const button of startButtons) {
-      if (await button.isVisible({ timeout: 2000 }).catch(() => false)) {
-        await button.click();
-        quizStarted = true;
-        console.log('✅ Quiz started');
-        break;
-      }
-    }
-    
-    expect(quizStarted).toBeTruthy();
+    // Should navigate to first quiz question
+    await page.waitForURL('/quiz/1');
     
     // STEP 6: Answer at least one question
     await page.waitForTimeout(2000); // Give quiz time to load
@@ -161,8 +152,13 @@ test.describe('Quiz Generator - Core Requirements', () => {
     // Set mobile viewport
     await page.setViewportSize({ width: 375, height: 667 });
     
+    // Navigate to upload page first
+    const getStartedButton = page.getByRole('button', { name: /Get Started/i });
+    await getStartedButton.click();
+    await page.waitForURL('/upload');
+    
     // Check that content is still accessible
-    const uploadArea = page.locator('text=/Click to upload|drag and drop/i');
+    const uploadArea = page.locator('text=/Click to upload.*or drag and drop/i');
     await expect(uploadArea).toBeVisible();
     
     // Check no horizontal overflow

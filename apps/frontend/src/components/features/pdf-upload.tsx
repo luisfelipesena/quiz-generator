@@ -16,10 +16,12 @@ import {
   FileUploadItemDelete
 } from '@/components/ui/file-upload'
 import { useUploadPdfMutation } from '@/hooks/useQuizMutations'
+import { useQuizNavigation } from '@/hooks/useQuizNavigation'
 
 export function PdfUpload() {
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([])
   const uploadMutation = useUploadPdfMutation()
+  const { navigateToReview } = useQuizNavigation()
 
   const handleFilesChange = (files: File[]) => {
     setUploadedFiles(files)
@@ -36,6 +38,10 @@ export function PdfUpload() {
     console.error('File rejected:', file.name, message)
     // Show toast notification for file rejection
     toast.error(`File rejected: ${message}`)
+  }
+
+  const handleContinue = () => {
+    navigateToReview()
   }
 
 
@@ -154,9 +160,14 @@ export function PdfUpload() {
 
           {uploadMutation.isSuccess && (
             <div className="mt-6 p-4 bg-green-50 border border-green-200 rounded-lg">
-              <div className="flex items-center gap-2 text-green-700">
-                <CheckCircle2 className="w-5 h-5" />
-                <span className="font-medium">Questions generated successfully!</span>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2 text-green-700">
+                  <CheckCircle2 className="w-5 h-5" />
+                  <span className="font-medium">Questions generated successfully!</span>
+                </div>
+                <Button onClick={handleContinue} size="sm" className="ml-4">
+                  Continue to Review
+                </Button>
               </div>
             </div>
           )}

@@ -28,6 +28,11 @@ interface QuizState {
   currentQuestionIndex: number
   answers: QuizAnswer[]
   showFeedback: boolean
+  userAnswers: Record<string, string> // Store selected answers by question ID
+  
+  // Error handling
+  error: string | null
+  isLoading: boolean
 }
 
 interface QuizActions {
@@ -39,14 +44,23 @@ interface QuizActions {
   
   // Quiz actions
   startQuiz: () => void
+  setCurrentQuestionIndex: (index: number) => void
   submitAnswer: (questionId: string, userAnswer: string, result: AnswerResponse) => void
+  setUserAnswer: (questionId: string, answer: string) => void
+  getUserAnswer: (questionId: string) => string | undefined
   nextQuestion: () => void
   resetQuiz: () => void
+  
+  // Error handling
+  setError: (error: string | null) => void
+  setLoading: (loading: boolean) => void
+  clearError: () => void
   
   // Computed
   getScore: () => { correct: number; total: number; percentage: number }
   getCurrentQuestion: () => QuestionAnswer | null
   isQuizComplete: () => boolean
+  canNavigateToStep: (step: QuizStep) => boolean
 }
 
 export const useQuizStore = create<QuizState & QuizActions>()(
@@ -62,6 +76,9 @@ export const useQuizStore = create<QuizState & QuizActions>()(
       currentQuestionIndex: 0,
       answers: [],
       showFeedback: false,
+      userAnswers: {},
+      error: null,
+      isLoading: false,
 
       // Actions
       setCurrentStep: (step) => {
@@ -126,6 +143,26 @@ export const useQuizStore = create<QuizState & QuizActions>()(
         }
       },
 
+      setCurrentQuestionIndex: (index) => {
+        const { questions } = get()
+        if (index >= 0 && index < questions.length) {
+          set({ currentQuestionIndex: index, showFeedback: false })
+        }
+      },
+
+      setUserAnswer: (questionId, answer) =>
+        set((state) => ({
+          userAnswers: {
+            ...state.userAnswers,
+            [questionId]: answer,
+          },
+        })),
+
+      getUserAnswer: (questionId) => {
+        const { userAnswers } = get()
+        return userAnswers[questionId]
+      },
+
       submitAnswer: (questionId, userAnswer, result) =>
         set((state) => ({
           answers: [
@@ -163,7 +200,15 @@ export const useQuizStore = create<QuizState & QuizActions>()(
           currentQuestionIndex: 0,
           answers: [],
           showFeedback: false,
+          userAnswers: {},
+          error: null,
+          isLoading: false,
         }),
+
+      // Error handling
+      setError: (error) => set({ error }),
+      setLoading: (isLoading) => set({ isLoading }),
+      clearError: () => set({ error: null }),
 
       // Computed functions
       getScore: () => {
@@ -187,15 +232,36 @@ export const useQuizStore = create<QuizState & QuizActions>()(
         const { questions, currentQuestionIndex } = get()
         return currentQuestionIndex >= questions.length
       },
+
+      canNavigateToStep: (step) => {
+        const { questions, answers } = get()
+        switch (step) {
+          case 'upload':
+            return true
+          case 'edit':
+            return questions.length > 0
+          case 'quiz':
+            return questions.length > 0
+          case 'results':
+            return questions.length > 0 && answers.length > 0
+          default:
+            return false
+        }
+      },
     }),
       {
         name: 'quiz-store',
-        // Only persist the essential state, not the computed functions
+        // Persist all essential state for URL-based navigation
         partialize: (state) => ({
-          editedQuestions: state.editedQuestions,
           questions: state.questions,
+          editedQuestions: state.editedQuestions,
           quizTitle: state.quizTitle,
           userName: state.userName,
+          currentQuestionIndex: state.currentQuestionIndex,
+          answers: state.answers,
+          userAnswers: state.userAnswers,
+          currentStep: state.currentStep,
+          // Don't persist loading/error states
         }),
       }
     ),

@@ -11,6 +11,7 @@ import { type QuestionAnswer, type QuestionUpdateRequest } from '@/lib/api'
 import { useQuizStore } from '@/stores/quiz-store'
 import { useSessionId } from '@/hooks/useSessionId'
 import { UnstuckIcon, BackArrowIcon } from '@/components/icons'
+import { useRouter } from 'next/navigation'
 
 interface QuestionEditorProps {
   question: QuestionAnswer
@@ -165,22 +166,23 @@ export function QuestionEditor({ question, index }: QuestionEditorProps) {
 
 export function QuestionEditList() {
   const { questions, setCurrentStep } = useQuizStore()
+  const router = useRouter()
 
   const handleStartQuiz = () => {
     // Show preparing screen first
     setCurrentStep('preparing')
-    // Then transition to quiz after a short delay
+    // Then navigate to quiz after a short delay
     setTimeout(() => {
-      setCurrentStep('quiz')
+      router.push('/quiz/1')
     }, 2000)
   }
 
   const handleBack = () => {
-    setCurrentStep('upload')
+    router.push('/upload')
   }
 
   return (
-    <div className="max-w-3xl mx-auto space-y-8 px-4 sm:px-0">
+    <div className="max-w-3xl mx-auto space-y-8">
       <div className="space-y-4">
         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-6">
           <button
@@ -204,7 +206,7 @@ export function QuestionEditList() {
         </div>
       </div>
 
-      <div className="space-y-4 pb-32">
+      <div className="space-y-4 pb-20">
         {questions.map((question, index) => (
           <QuestionEditor key={question.id} question={question} index={index} />
         ))}

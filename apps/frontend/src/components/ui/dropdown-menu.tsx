@@ -47,8 +47,8 @@ export function DropdownMenu({ trigger, children, className }: DropdownMenuProps
       </div>
       
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-56 bg-white border border-gray-200 rounded-lg shadow-lg z-50 animate-in fade-in slide-in-from-top-2 duration-200">
-          <div className="py-1">
+        <div className="absolute right-0 mt-2 w-64 bg-white border border-gray-200 rounded-xl shadow-xl z-[9999] animate-in fade-in slide-in-from-top-2 duration-200 overflow-hidden">
+          <div className="py-2">
             {children}
           </div>
         </div>
@@ -69,12 +69,12 @@ export function DropdownMenuItem({ onClick, children, className, icon }: Dropdow
     <button
       onClick={onClick}
       className={cn(
-        "w-full flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors text-left",
+        "w-full flex items-center gap-3 px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 transition-colors text-left rounded-md mx-1 my-0.5",
         className
       )}
     >
       {icon && <span className="flex-shrink-0">{icon}</span>}
-      <span>{children}</span>
+      <div className="flex-1">{children}</div>
     </button>
   )
 }

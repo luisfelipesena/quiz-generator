@@ -1,9 +1,11 @@
 import { useState, useCallback } from 'react'
 import { useMutation } from '@tanstack/react-query'
+import { type QuestionAnswer } from '@/lib/api'
 
 interface StreamingFeedbackRequest {
   questionId: string
   userAnswer: string
+  questions: QuestionAnswer[]
 }
 
 interface StreamingFeedbackState {
@@ -20,7 +22,7 @@ export function useStreamingFeedback() {
   })
 
   const streamingMutation = useMutation({
-    mutationFn: async ({ questionId, userAnswer }: StreamingFeedbackRequest) => {
+    mutationFn: async ({ questionId, userAnswer, questions }: StreamingFeedbackRequest) => {
       setState(prev => ({ ...prev, isStreaming: true, feedback: '', error: null }))
 
       try {
@@ -34,6 +36,7 @@ export function useStreamingFeedback() {
             body: JSON.stringify({
               question_id: questionId,
               user_answer: userAnswer,
+              questions: questions,
             }),
           }
         )
@@ -49,6 +52,29 @@ export function useStreamingFeedback() {
 
         const decoder = new TextDecoder()
         let buffer = ''
+        let accumulatedFeedback = ''
+        let updateTimeoutId: NodeJS.Timeout | null = null
+
+        // Function to update UI with accumulated feedback
+        const updateFeedback = () => {
+          setState(prev => ({ 
+            ...prev, 
+            feedback: accumulatedFeedback.replace(/\s+/g, ' ').trim() // Clean up extra spaces
+          }))
+        }
+
+        // Batch updates to avoid too frequent re-renders
+        const debouncedUpdate = (immediate = false) => {
+          if (updateTimeoutId) {
+            clearTimeout(updateTimeoutId)
+          }
+          
+          if (immediate) {
+            updateFeedback()
+          } else {
+            updateTimeoutId = setTimeout(updateFeedback, 50) // Update every 50ms
+          }
+        }
 
         while (true) {
           const { done, value } = await reader.read()
@@ -62,15 +88,30 @@ export function useStreamingFeedback() {
             if (line.startsWith('data: ')) {
               const data = line.slice(6).trim()
               if (data === '[DONE]') {
-                setState(prev => ({ ...prev, isStreaming: false }))
+                setState(prev => ({ ...prev, isStreaming: false, feedback: accumulatedFeedback.replace(/\s+/g, ' ').trim() }))
+                if (updateTimeoutId) clearTimeout(updateTimeoutId)
                 return
               }
               if (data) {
-                setState(prev => ({ ...prev, feedback: prev.feedback + data }))
+                // Smart spacing: only add space if needed
+                if (accumulatedFeedback && 
+                    !accumulatedFeedback.endsWith(' ') && 
+                    !accumulatedFeedback.endsWith('\n') &&
+                    !data.startsWith(' ') &&
+                    !data.match(/^[,.!?;:]/) && // Don't add space before punctuation
+                    !accumulatedFeedback.match(/[-"'(]$/)) { // Don't add space after certain chars
+                  accumulatedFeedback += ' '
+                }
+                accumulatedFeedback += data
+                debouncedUpdate()
               }
             }
           }
         }
+        
+        // Final cleanup
+        if (updateTimeoutId) clearTimeout(updateTimeoutId)
+        updateFeedback()
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : 'Unknown error'
         setState(prev => ({ 
@@ -89,7 +130,9 @@ export function useStreamingFeedback() {
       isStreaming: false,
       error: null,
     })
-  }, [])
+    // Also reset any ongoing streaming mutation
+    streamingMutation.reset()
+  }, [streamingMutation])
 
   return {
     ...state,

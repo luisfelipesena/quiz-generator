@@ -10,6 +10,7 @@ import { UserNameModal } from '@/components/features/user-name-modal'
 import { useQuizStore } from '@/stores/quiz-store'
 import { useShareResults } from '@/hooks/useShareResults'
 import { clearSession } from '@/hooks/useSessionId'
+import { useRouter } from 'next/navigation'
 
 export function QuizResults() {
   const { questions, answers, getScore, resetQuiz, userName } = useQuizStore()
@@ -17,6 +18,7 @@ export function QuizResults() {
   const [showNameModal, setShowNameModal] = useState(false)
   const [shareMessage, setShareMessage] = useState('')
   const { shareAsText, downloadAsPDF, copyToClipboard } = useShareResults()
+  const router = useRouter()
 
   // Show name modal if user name is not set
   useEffect(() => {
@@ -48,13 +50,22 @@ export function QuizResults() {
           break
       }
       
-      if (result.success) {
+      if (result && result.success) {
         const messages: Record<string, string> = {
           native: 'Results shared successfully!',
-          clipboard: 'Results copied to clipboard!',
+          copy: 'Results copied to clipboard!',
           download: 'Results downloaded successfully!'
         }
         setShareMessage(messages[result.method] || 'Results shared!')
+        setTimeout(() => setShareMessage(''), 3000)
+      } else {
+        // Show success message even if result format is different
+        const messages: Record<string, string> = {
+          native: 'Results shared successfully!',
+          copy: 'Results copied to clipboard!',
+          download: 'Results downloaded successfully!'
+        }
+        setShareMessage(messages[method] || 'Results shared!')
         setTimeout(() => setShareMessage(''), 3000)
       }
     } catch (error) {
@@ -67,8 +78,8 @@ export function QuizResults() {
   const handleTakeAnotherQuiz = () => {
     resetQuiz()
     clearSession()
-    // Full page reload to ensure a clean state and new session
-    window.location.reload()
+    // Navigate to home page with clean state
+    router.push('/')
   }
 
   return (
@@ -80,6 +91,53 @@ export function QuizResults() {
       />
 
       <div className={`max-w-3xl mx-auto ${showNameModal ? 'blur-sm' : ''} px-4 sm:px-0 pb-32 min-h-screen`}>
+        {/* Back Button */}
+        <div className="flex items-center justify-between gap-3 py-4">
+          <button
+            onClick={() => {
+              useQuizStore.getState().setCurrentStep('quiz')
+              router.push(`/quiz/${questions.length}`)
+            }}
+            className="flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            </svg>
+            <span className="text-sm font-medium">Back to Quiz</span>
+          </button>
+          <DropdownMenu
+            trigger={
+              <Button 
+                size="lg"
+                className="px-6 py-3 text-base font-medium rounded-lg flex items-center gap-2 w-full sm:w-auto"
+              >
+                <Share className="w-4 h-4" />
+                Share results
+                <ChevronDown className="w-4 h-4" />
+              </Button>
+            }
+          >
+            <DropdownMenuItem 
+              onClick={() => handleShare('native')}
+              icon={<Share className="w-4 h-4" />}
+            >
+              Share via system
+            </DropdownMenuItem>
+            <DropdownMenuItem 
+              onClick={() => handleShare('copy')}
+              icon={<Copy className="w-4 h-4" />}
+            >
+              Copy to clipboard
+            </DropdownMenuItem>
+            <DropdownMenuItem 
+              onClick={() => handleShare('download')}
+              icon={<Download className="w-4 h-4" />}
+            >
+              Download as file
+            </DropdownMenuItem>
+          </DropdownMenu>
+        </div>
+        
         {/* Results Header */}
         <div className="text-center space-y-6 py-8">
           <div className="inline-flex items-center justify-center w-20 h-20 sm:w-24 sm:h-24">
@@ -158,11 +216,18 @@ export function QuizResults() {
                   </summary>
                   <div className="mt-3 px-3 pb-3 space-y-3">
                     <p className="text-sm text-gray-700">{question.question}</p>
-                    {!answer.isCorrect && (
+                    <div className="space-y-2">
                       <p className="text-sm text-gray-600">
-                        Correct answer: <span className="font-medium text-gray-900">{answer.correctAnswer}</span>
+                        <span className="font-medium text-gray-800">Your answer:</span> 
+                        <span className={answer.isCorrect ? 'text-green-700 font-medium' : 'text-red-700 font-medium'}> {answer.userAnswer}</span>
                       </p>
-                    )}
+                      {!answer.isCorrect && (
+                        <p className="text-sm text-gray-600">
+                          <span className="font-medium text-gray-800">Correct answer:</span> 
+                          <span className="font-medium text-green-700"> {answer.correctAnswer}</span>
+                        </p>
+                      )}
+                    </div>
                   </div>
                 </details>
               )
@@ -172,37 +237,7 @@ export function QuizResults() {
 
         {/* Fixed Action Buttons */}
         <div className="fixed bottom-0 left-0 right-0 flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 p-4 bg-white border-t border-gray-200 shadow-lg z-50">
-          <DropdownMenu
-            trigger={
-              <Button 
-                size="lg"
-                className="px-6 py-3 text-base font-medium rounded-lg flex items-center gap-2 w-full sm:w-auto"
-              >
-                <Share className="w-4 h-4" />
-                Share results
-                <ChevronDown className="w-4 h-4" />
-              </Button>
-            }
-          >
-            <DropdownMenuItem 
-              onClick={() => handleShare('native')}
-              icon={<Share className="w-4 h-4" />}
-            >
-              Share via system
-            </DropdownMenuItem>
-            <DropdownMenuItem 
-              onClick={() => handleShare('copy')}
-              icon={<Copy className="w-4 h-4" />}
-            >
-              Copy to clipboard
-            </DropdownMenuItem>
-            <DropdownMenuItem 
-              onClick={() => handleShare('download')}
-              icon={<Download className="w-4 h-4" />}
-            >
-              Download as file
-            </DropdownMenuItem>
-          </DropdownMenu>
+
           
           <Button 
             onClick={handleTakeAnotherQuiz}

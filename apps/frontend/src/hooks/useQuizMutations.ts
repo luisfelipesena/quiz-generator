@@ -21,18 +21,12 @@ export function useUploadPdfMutation() {
     },
     onSuccess: (data: QuizResponse) => {
       setQuiz(data.quiz_title, data.questions)
-      toast.success(`Generated ${data.questions.length} questions for "${data.quiz_title}"!`)
-      // Show success for a moment, then transition to edit
-      setTimeout(() => {
-        setCurrentStep('edit')
-      }, 1500)
+      setCurrentStep('edit')
     },
     onError: (error: ApiError) => {
       console.error('PDF upload failed:', error)
-      // Return to upload step on error
       setCurrentStep('upload')
       
-      // Show user-friendly error message in toast
       let userMessage = 'Failed to generate quiz. Please try again.'
       
       if (error.message.includes('OpenAI')) {

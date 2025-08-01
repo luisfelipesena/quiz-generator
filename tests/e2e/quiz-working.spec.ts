@@ -14,9 +14,9 @@ test.describe('Quiz Generator - Working Tests', () => {
     const heading = page.getByText(/Unstuck Quiz Generator/i);
     await expect(heading).toBeVisible();
     
-    // Check upload text
-    const uploadText = page.getByText(/Click to upload/i);
-    await expect(uploadText).toBeVisible();
+    // Check Get Started button
+    const getStartedButton = page.getByRole('button', { name: /Get Started/i });
+    await expect(getStartedButton).toBeVisible();
     
     console.log('✅ Homepage test passed');
   });
@@ -25,8 +25,13 @@ test.describe('Quiz Generator - Working Tests', () => {
     // Set mobile viewport
     await page.setViewportSize({ width: 375, height: 667 });
     
+    // Navigate to upload page
+    const getStartedButton = page.getByRole('button', { name: /Get Started/i });
+    await getStartedButton.click();
+    await page.waitForURL('/upload');
+    
     // Check that content is still visible and accessible
-    const uploadArea = page.getByText(/Click to upload/i);
+    const uploadArea = page.getByText(/Click to upload.*or drag and drop/i);
     await expect(uploadArea).toBeVisible();
     
     // Check no horizontal scroll
@@ -37,6 +42,11 @@ test.describe('Quiz Generator - Working Tests', () => {
   });
 
   test('✅ File input exists and is functional', async ({ page }) => {
+    // Navigate to upload page first
+    const getStartedButton = page.getByRole('button', { name: /Get Started/i });
+    await getStartedButton.click();
+    await page.waitForURL('/upload');
+    
     // Check file input exists
     const fileInput = page.locator('input[type="file"]');
     await expect(fileInput).toBeVisible();
@@ -49,8 +59,13 @@ test.describe('Quiz Generator - Working Tests', () => {
   });
 
   test('✅ Upload area has proper styling', async ({ page }) => {
-    // Check for drop zone styling
-    const dropZone = page.locator('[class*="drop"], [class*="upload"]').first();
+    // Navigate to upload page first
+    const getStartedButton = page.getByRole('button', { name: /Get Started/i });
+    await getStartedButton.click();
+    await page.waitForURL('/upload');
+    
+    // Check for drop zone styling - use more specific selector
+    const dropZone = page.locator('div').filter({ hasText: /Click to upload.*or drag and drop/i }).first();
     await expect(dropZone).toBeVisible();
     
     console.log('✅ Upload area styling test passed');
@@ -98,8 +113,13 @@ test.describe('Requirements Verification', () => {
   test('✅ User flow components present', async ({ page }) => {
     await page.goto('/');
     
+    // Navigate to upload page first
+    const getStartedButton = page.getByRole('button', { name: /Get Started/i });
+    await getStartedButton.click();
+    await page.waitForURL('/upload');
+    
     // Check upload interface exists
-    const uploadInterface = page.getByText(/Click to upload|drag and drop/i);
+    const uploadInterface = page.getByText(/Click to upload.*or drag and drop/i);
     await expect(uploadInterface).toBeVisible();
     
     // Check file input exists (for PDF upload)
@@ -131,6 +151,11 @@ test.describe('Final Validation', () => {
     // Final checks
     await expect(page).toHaveTitle(/Quiz Generator/);
     await expect(page.getByText(/Unstuck Quiz Generator/i)).toBeVisible();
+    
+    // Navigate to upload page to check file input
+    const getStartedButton = page.getByRole('button', { name: /Get Started/i });
+    await getStartedButton.click();
+    await page.waitForURL('/upload');
     await expect(page.locator('input[type="file"]')).toBeVisible();
     
     console.log('\n🎉 FINAL VALIDATION COMPLETE');

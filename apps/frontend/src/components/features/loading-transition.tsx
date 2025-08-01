@@ -25,8 +25,9 @@ export function LoadingTransition({ title, subtitle, showNextButton = false, nex
     }
   }
   return (
-    <div className="max-w-2xl mx-auto space-y-8">
-      <div className="text-center space-y-8">
+    <div className="flex items-center justify-center min-h-[60vh]">
+      <div className="max-w-2xl mx-auto space-y-8">
+        <div className="text-center space-y-8">
         {/* Animated transition icon */}
         <div className="flex justify-center">
           <TransitionIcon 
@@ -61,6 +62,7 @@ export function LoadingTransition({ title, subtitle, showNextButton = false, nex
             </Button>
           </div>
         )}
+        </div>
       </div>
     </div>
   )
