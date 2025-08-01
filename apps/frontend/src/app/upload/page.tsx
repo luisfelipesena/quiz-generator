@@ -10,10 +10,21 @@ export default function UploadPage() {
   const { currentStep, questions } = useQuizStore()
   const router = useRouter()
 
-  // Handle automatic transitions for loading states only if we have questions
+  // Handle automatic transitions only for fresh uploads, not back navigation
   useEffect(() => {
-    if (currentStep === 'edit' && questions.length > 0) {
-      router.push('/review')
+    // Only redirect if currentStep is 'edit' and we're actually on the upload URL
+    // This prevents redirect loops when user navigates back
+    if (currentStep === 'edit' && questions.length > 0 && window.location.pathname === '/upload') {
+      // Add a small delay to ensure the page has fully loaded
+      const timeoutId = setTimeout(() => {
+        // Double-check we're still in the right state
+        const currentState = useQuizStore.getState()
+        if (currentState.currentStep === 'edit' && window.location.pathname === '/upload') {
+          router.push('/review')
+        }
+      }, 50)
+      
+      return () => clearTimeout(timeoutId)
     }
   }, [currentStep, questions.length, router])
 

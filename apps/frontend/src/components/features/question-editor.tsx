@@ -178,6 +178,7 @@ export function QuestionEditList() {
   }
 
   const handleBack = () => {
+    useQuizStore.getState().setCurrentStep('upload')
     router.push('/upload')
   }
 
