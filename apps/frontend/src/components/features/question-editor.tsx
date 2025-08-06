@@ -10,7 +10,8 @@ import { Label } from '@/components/ui/label'
 import { type QuestionAnswer, type QuestionUpdateRequest } from '@/lib/api'
 import { useQuizStore } from '@/stores/quiz-store'
 import { useSessionId } from '@/hooks/useSessionId'
-import { UnstuckIcon, BackArrowIcon } from '@/components/icons'
+import { BackArrowIcon, UnstuckIcon } from '@/components/icons'
+import { QuestionCard } from './question-card'
 import { useRouter } from 'next/navigation'
 
 interface QuestionEditorProps {
@@ -78,28 +79,51 @@ export function QuestionEditor({ question, index }: QuestionEditorProps) {
     }
   }
 
+  if (!isEditing) {
+    return (
+      <div className="relative">
+        <QuestionCard
+          questionNumber={index + 1}
+          question={question.question}
+          options={question.options || []}
+          selectedAnswer={undefined}
+          correctAnswer={question.answer}
+          showFeedback={true}
+          disabled={true}
+          mode="edit"
+        />
+        <div className="absolute top-4 right-4">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setIsEditing(true)}
+            className="text-gray-600 hover:text-gray-900"
+          >
+            <Edit3 className="w-4 h-4 mr-1" />
+            Edit
+          </Button>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="bg-white p-4 sm:p-6 rounded-xl border border-gray-200 shadow-sm">
       <div className="space-y-4">
-
         <div className="flex items-start justify-between">
           <div className="flex-1">
             <h3 className="text-sm font-medium text-gray-900">Question {index + 1}</h3>
-            {isEditing ? (
-              <Textarea
-                value={editedQuestion.question}
-                onChange={(e) =>
-                  setEditedQuestion({
-                    ...editedQuestion,
-                    question: e.target.value,
-                  })
-                }
-                className="mt-2 w-full resize-none border-gray-300 rounded-lg"
-                rows={2}
-              />
-            ) : (
-              <p className="mt-2 text-base text-gray-700">{question.question}</p>
-            )}
+            <Textarea
+              value={editedQuestion.question}
+              onChange={(e) =>
+                setEditedQuestion({
+                  ...editedQuestion,
+                  question: e.target.value,
+                })
+              }
+              className="mt-2 w-full resize-none border-gray-300 rounded-lg"
+              rows={2}
+            />
           </div>
         </div>
 
@@ -112,85 +136,53 @@ export function QuestionEditor({ question, index }: QuestionEditorProps) {
                   <span className="text-sm text-gray-500 min-w-[60px]">
                     Option {optionIndex + 1}:
                   </span>
-                  {isEditing ? (
-                    <div className="w-full flex-1 flex items-center gap-2">
-                      <Input
-                        value={option}
-                        onChange={(e) => updateOption(optionIndex, e.target.value)}
-                        className={`flex-1 h-10 rounded-lg ${isCorrectAnswer(option) ? 'border-green-500 bg-green-50' : 'border-gray-300'}`}
-                      />
-                      <button
-                        type="button"
-                        onClick={() => setCorrectAnswer(option)}
-                        className={`flex items-center gap-1 px-2 py-1 rounded text-xs font-medium transition-colors ${
-                          isCorrectAnswer(option) 
-                            ? 'text-green-600 bg-green-100' 
-                            : 'text-gray-400 hover:text-green-600 hover:bg-green-50'
-                        }`}
-                      >
-                        <Check className="w-4 h-4" />
-                        {isCorrectAnswer(option) ? 'Correct' : 'Set as correct'}
-                      </button>
-                    </div>
-                  ) : (
-                    <div className="w-full flex-1 flex items-center gap-2">
-                      <div className={`w-full flex-1 h-10 px-3 flex items-center rounded-lg border ${isCorrectAnswer(option) ? 'border-green-500 bg-green-50' : 'border-gray-300 bg-gray-50'}`}>
-                        <span className={`text-sm ${isCorrectAnswer(option) ? 'text-green-700 font-medium' : 'text-gray-700'}`}>
-                          {option}
-                        </span>
-                      </div>
-                      {isCorrectAnswer(option) && (
-                        <div className="flex items-center gap-1 text-green-600">
-                          <Check className="w-5 h-5" />
-                          <span className="text-xs font-medium">Correct Answer</span>
-                        </div>
-                      )}
-                    </div>
-                  )}
+                  <div className="w-full flex-1 flex items-center gap-2">
+                    <Input
+                      value={option}
+                      onChange={(e) => updateOption(optionIndex, e.target.value)}
+                      className={`flex-1 h-10 rounded-lg ${isCorrectAnswer(option) ? 'border-green-500 bg-green-50' : 'border-gray-300'}`}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setCorrectAnswer(option)}
+                      className={`flex items-center gap-1 px-2 py-1 rounded text-xs font-medium transition-colors ${
+                        isCorrectAnswer(option) 
+                          ? 'text-green-600 bg-green-100' 
+                          : 'text-gray-400 hover:text-green-600 hover:bg-green-50'
+                      }`}
+                    >
+                      <Check className="w-4 h-4" />
+                      {isCorrectAnswer(option) ? 'Correct' : 'Set as correct'}
+                    </button>
+                  </div>
                 </div>
               ))}
             </div>
           )}
-          {isEditing && (
-            <div className="mt-4 pt-4 border-t border-gray-200">
-              <Label className="text-sm font-medium text-gray-600">Correct Answer</Label>
-              <Input
-                value={editedQuestion.answer}
-                onChange={(e) => handleAnswerChange(e.target.value)}
-                className="mt-1 border-gray-300 rounded-lg"
-                placeholder="Enter the correct answer"
-              />
-              {editedQuestion.options && !editedQuestion.options.includes(editedQuestion.answer) && (
-                <p className="text-xs text-amber-600 mt-1">
-                  ⚠️ This answer doesn&apos;t match any of the options above. The first option will be updated automatically when saved.
-                </p>
-              )}
-            </div>
-          )}
+          <div className="mt-4 pt-4 border-t border-gray-200">
+            <Label className="text-sm font-medium text-gray-600">Correct Answer</Label>
+            <Input
+              value={editedQuestion.answer}
+              onChange={(e) => handleAnswerChange(e.target.value)}
+              className="mt-1 border-gray-300 rounded-lg"
+              placeholder="Enter the correct answer"
+            />
+            {editedQuestion.options && !editedQuestion.options.includes(editedQuestion.answer) && (
+              <p className="text-xs text-amber-600 mt-1">
+                ⚠️ This answer doesn&apos;t match any of the options above. The first option will be updated automatically when saved.
+              </p>
+            )}
+          </div>
         </div>
 
-        {isEditing ? (
-          <div className="flex justify-end gap-2 pt-4">
-            <Button variant="outline" size="sm" onClick={handleCancel}>
-              Cancel
-            </Button>
-            <Button size="sm" onClick={handleSave}>
-              Save Changes
-            </Button>
-          </div>
-        ) : (
-          <div className="flex justify-end pt-2">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setIsEditing(true)}
-              className="text-gray-600 hover:text-gray-900"
-            >
-              <Edit3 className="w-4 h-4 mr-1" />
-              Edit
-            </Button>
-          </div>
-        )}
+        <div className="flex justify-end gap-2 pt-4">
+          <Button variant="outline" size="sm" onClick={handleCancel}>
+            Cancel
+          </Button>
+          <Button size="sm" onClick={handleSave}>
+            Save Changes
+          </Button>
+        </div>
       </div>
     </div>
   )
@@ -215,28 +207,28 @@ export function QuestionEditList() {
   }
 
   return (
-    <div className="max-w-3xl mx-auto space-y-8">
-      <div className="space-y-4">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-6">
-          <button
-            onClick={handleBack}
-            className="flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors"
-          >
-            <BackArrowIcon width={20} height={20} />
-            <span className="text-sm font-medium">Back</span>
-          </button>
+    <div className="max-w-3xl mx-auto">
+      {/* Header like a page header - positioned at top */}
+      <div className="flex items-center justify-start w-full py-4">
+        <button
+          onClick={handleBack}
+          className="text-blue-600 hover:text-blue-700 flex items-center gap-2 text-sm font-medium"
+        >
+          <BackArrowIcon width={16} height={16} />
+          Back
+        </button>
+      </div>
 
-          <div className="flex items-center gap-3">
-            <UnstuckIcon 
-              width={24} 
-              height={24} 
-              className="text-primary" 
-            />
-            <h1 className="text-2xl font-semibold text-gray-900">
-              Review & Edit Questions
-            </h1>
-          </div>
-        </div>
+      {/* Title above questions */}
+      <div className="flex items-center gap-3 mb-8">
+        <UnstuckIcon 
+          width={24} 
+          height={24} 
+          className="text-primary" 
+        />
+        <h1 className="text-2xl font-semibold text-gray-900">
+          Review & Edit Questions
+        </h1>
       </div>
 
       <div className="space-y-4 pb-20">
@@ -245,7 +237,7 @@ export function QuestionEditList() {
         ))}
       </div>
 
-      <div className="fixed bottom-0 left-0 right-0 flex justify-center p-4 bg-white border-t border-gray-200 shadow-lg z-50">
+      <div className="fixed bottom-0 left-0 right-0 flex justify-center p-4 bg-gradient-to-t from-white via-white/95 to-transparent shadow-lg z-50">
         <Button 
           onClick={handleStartQuiz} 
           size="lg" 

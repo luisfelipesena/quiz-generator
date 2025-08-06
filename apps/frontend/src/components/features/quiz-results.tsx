@@ -1,12 +1,14 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Check, X, Share, Download, Copy, RotateCcw, ChevronDown } from 'lucide-react'
-import { ChevronDownIcon } from '@/components/icons'
+import { Share, Download, Copy, RotateCcw, ChevronDown, Check } from 'lucide-react'
+import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
-import { SuccessIcon } from '@/components/icons'
+import { SuccessIcon, BackArrowIcon } from '@/components/icons'
+import { PdfIcon } from '@/components/icons/pdf-icon'
 import { DropdownMenu, DropdownMenuItem } from '@/components/ui/dropdown-menu'
 import { UserNameModal } from '@/components/features/user-name-modal'
+import { QuestionCard } from './question-card'
 import { useQuizStore } from '@/stores/quiz-store'
 import { useShareResults } from '@/hooks/useShareResults'
 import { clearSession } from '@/hooks/useSessionId'
@@ -91,51 +93,65 @@ export function QuizResults() {
       />
 
       <div className={`max-w-3xl mx-auto ${showNameModal ? 'blur-sm' : ''} px-4 sm:px-0 pb-32 min-h-screen`}>
-        {/* Back Button */}
-        <div className="flex items-center justify-between gap-3 py-4">
-          <button
-            onClick={() => {
-              useQuizStore.getState().setCurrentStep('quiz')
-              router.push(`/quiz/${questions.length}`)
-            }}
-            className="flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors"
-          >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-            </svg>
-            <span className="text-sm font-medium">Back to Quiz</span>
-          </button>
-          <DropdownMenu
-            trigger={
-              <Button 
-                size="lg"
-                className="px-6 py-3 text-base font-medium rounded-lg flex items-center gap-2 w-full sm:w-auto"
+        <div className="flex items-center justify-between py-4">
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => {
+                useQuizStore.getState().setCurrentStep('quiz')
+                router.push(`/quiz/${questions.length}`)
+              }}
+              className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+            >
+              <BackArrowIcon width={20} height={20} />
+            </button>
+            <div className="flex items-center gap-2">
+              <div className="w-6 h-6 bg-red-500 rounded flex items-center justify-center">
+                <PdfIcon width={16} height={16} className="text-white" />
+              </div>
+              <h1 className="text-xl font-semibold text-foreground">
+                Mathematics Quiz
+              </h1>
+            </div>
+          </div>
+          
+          <div className="flex items-center gap-2">
+            <Button
+              onClick={() => toast.info('Upgrade feature coming soon!')}
+              className="bg-black text-white hover:bg-gray-800 px-4 py-2 text-sm font-medium"
+            >
+              Upgrade
+            </Button>
+            <DropdownMenu
+              trigger={
+                <Button 
+                  className="px-4 py-2 text-sm font-medium rounded-lg flex items-center gap-2 bg-primary text-white hover:bg-primary/90"
+                >
+                  <Share className="w-4 h-4" />
+                  Share results
+                  <ChevronDown className="w-4 h-4" />
+                </Button>
+              }
+            >
+              <DropdownMenuItem 
+                onClick={() => handleShare('native')}
+                icon={<Share className="w-4 h-4" />}
               >
-                <Share className="w-4 h-4" />
-                Share results
-                <ChevronDown className="w-4 h-4" />
-              </Button>
-            }
-          >
-            <DropdownMenuItem 
-              onClick={() => handleShare('native')}
-              icon={<Share className="w-4 h-4" />}
-            >
-              Share via system
-            </DropdownMenuItem>
-            <DropdownMenuItem 
-              onClick={() => handleShare('copy')}
-              icon={<Copy className="w-4 h-4" />}
-            >
-              Copy to clipboard
-            </DropdownMenuItem>
-            <DropdownMenuItem 
-              onClick={() => handleShare('download')}
-              icon={<Download className="w-4 h-4" />}
-            >
-              Download as file
-            </DropdownMenuItem>
-          </DropdownMenu>
+                Share via system
+              </DropdownMenuItem>
+              <DropdownMenuItem 
+                onClick={() => handleShare('copy')}
+                icon={<Copy className="w-4 h-4" />}
+              >
+                Copy to clipboard
+              </DropdownMenuItem>
+              <DropdownMenuItem 
+                onClick={() => handleShare('download')}
+                icon={<Download className="w-4 h-4" />}
+              >
+                Download as file
+              </DropdownMenuItem>
+            </DropdownMenu>
+          </div>
         </div>
         
         {/* Results Header */}
@@ -188,57 +204,30 @@ export function QuizResults() {
         )}
 
         {/* Result Summary */}
-        <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-4 sm:p-6 mb-6">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">Result Summary</h2>
-          <div className="space-y-3">
-            {questions.map((question, index) => {
-              const answer = answers.find(a => a.questionId === question.id)
-              if (!answer) return null
+        <div className="space-y-4 mb-6">
+          <h2 className="text-lg font-semibold text-gray-900">Result Summary</h2>
+          {questions.map((question, index) => {
+            const answer = answers.find(a => a.questionId === question.id)
+            if (!answer) return null
 
-              return (
-                <details key={question.id} className="group">
-                  <summary className="flex items-center justify-between cursor-pointer p-3 rounded-lg hover:bg-gray-50 transition-colors">
-                    <div className="flex items-center gap-3">
-                      <span className="text-sm font-medium text-gray-600">Question {index + 1}</span>
-                      {answer.isCorrect ? (
-                        <div className="flex items-center gap-1 text-green-600">
-                          <Check className="w-4 h-4" />
-                          <span className="text-sm">Correct Answer</span>
-                        </div>
-                      ) : (
-                        <div className="flex items-center gap-1 text-red-600">
-                          <X className="w-4 h-4" />
-                          <span className="text-sm">Wrong Answer</span>
-                        </div>
-                      )}
-                    </div>
-                    <ChevronDownIcon className="w-4 h-4 text-gray-400 group-open:rotate-180 transition-transform" />
-                  </summary>
-                  <div className="mt-3 px-3 pb-3 space-y-3">
-                    <p className="text-sm text-gray-700">{question.question}</p>
-                    <div className="space-y-2">
-                      <p className="text-sm text-gray-600">
-                        <span className="font-medium text-gray-800">Your answer:</span> 
-                        <span className={answer.isCorrect ? 'text-green-700 font-medium' : 'text-red-700 font-medium'}> {answer.userAnswer}</span>
-                      </p>
-                      {!answer.isCorrect && (
-                        <p className="text-sm text-gray-600">
-                          <span className="font-medium text-gray-800">Correct answer:</span> 
-                          <span className="font-medium text-green-700"> {answer.correctAnswer}</span>
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                </details>
-              )
-            })}
-          </div>
+            return (
+              <QuestionCard
+                key={question.id}
+                questionNumber={index + 1}
+                question={question.question}
+                options={question.options || []}
+                selectedAnswer={answer.userAnswer}
+                correctAnswer={answer.correctAnswer}
+                showFeedback={true}
+                disabled={true}
+                mode="review"
+              />
+            )
+          })}
         </div>
 
         {/* Fixed Action Buttons */}
-        <div className="fixed bottom-0 left-0 right-0 flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 p-4 bg-white border-t border-gray-200 shadow-lg z-50">
-
-          
+        <div className="fixed bottom-0 left-0 right-0 flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 p-4 bg-gradient-to-t from-white via-white/95 to-transparent shadow-lg z-50">
           <Button 
             onClick={handleTakeAnotherQuiz}
             variant="outline"
